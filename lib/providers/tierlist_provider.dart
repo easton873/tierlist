@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/free_item.dart';
 import '../models/tier_item.dart';
 import '../models/tier_row.dart';
 import '../models/text_overlay_config.dart';
@@ -7,13 +9,23 @@ import '../utils/default_tiers.dart';
 class TierlistState {
   final List<TierRow> tiers;
   final List<TierItem> pool;
+  final List<FreeItem> freeItems;
 
-  const TierlistState({required this.tiers, required this.pool});
+  const TierlistState({
+    required this.tiers,
+    required this.pool,
+    this.freeItems = const [],
+  });
 
-  TierlistState copyWith({List<TierRow>? tiers, List<TierItem>? pool}) {
+  TierlistState copyWith({
+    List<TierRow>? tiers,
+    List<TierItem>? pool,
+    List<FreeItem>? freeItems,
+  }) {
     return TierlistState(
       tiers: tiers ?? this.tiers,
       pool: pool ?? this.pool,
+      freeItems: freeItems ?? this.freeItems,
     );
   }
 }
@@ -31,7 +43,6 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     if (item == null) return;
 
     final newTiers = state.tiers.map((row) {
-      // Remove from any tier it currently occupies
       final withoutItem = row.items.where((i) => i.id != itemId).toList();
       if (row.id == tierRowId) {
         final clamped = insertIndex.clamp(0, withoutItem.length);
@@ -42,7 +53,8 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     }).toList();
 
     final newPool = state.pool.where((i) => i.id != itemId).toList();
-    state = state.copyWith(tiers: newTiers, pool: newPool);
+    final newFree = state.freeItems.where((f) => f.item.id != itemId).toList();
+    state = state.copyWith(tiers: newTiers, pool: newPool, freeItems: newFree);
   }
 
   void moveItemToPool(String itemId) {
@@ -54,12 +66,28 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
               items: row.items.where((i) => i.id != itemId).toList(),
             ))
         .toList();
+    final newFree = state.freeItems.where((f) => f.item.id != itemId).toList();
 
     if (!state.pool.any((i) => i.id == itemId)) {
-      state = state.copyWith(tiers: newTiers, pool: [...state.pool, item]);
+      state = state.copyWith(
+          tiers: newTiers, pool: [...state.pool, item], freeItems: newFree);
     } else {
-      state = state.copyWith(tiers: newTiers);
+      state = state.copyWith(tiers: newTiers, freeItems: newFree);
     }
+  }
+
+  void placeFreeItem(TierItem item, Offset position) {
+    final newTiers = state.tiers
+        .map((row) => row.copyWith(
+              items: row.items.where((i) => i.id != item.id).toList(),
+            ))
+        .toList();
+    final newPool = state.pool.where((i) => i.id != item.id).toList();
+    final newFree = [
+      ...state.freeItems.where((f) => f.item.id != item.id),
+      FreeItem(item: item, position: position),
+    ];
+    state = state.copyWith(tiers: newTiers, pool: newPool, freeItems: newFree);
   }
 
   void updateItemOverlay(String itemId, TextOverlayConfig? overlay) {
@@ -69,9 +97,7 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
           items: row.items.map((item) {
             if (item.id == itemId) {
               return item.copyWith(
-                overlay: overlay,
-                clearOverlay: overlay == null,
-              );
+                  overlay: overlay, clearOverlay: overlay == null);
             }
             return item;
           }).toList(),
@@ -80,11 +106,17 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
       pool: state.pool.map((item) {
         if (item.id == itemId) {
           return item.copyWith(
-            overlay: overlay,
-            clearOverlay: overlay == null,
-          );
+              overlay: overlay, clearOverlay: overlay == null);
         }
         return item;
+      }).toList(),
+      freeItems: state.freeItems.map((fi) {
+        if (fi.item.id == itemId) {
+          return fi.copyWith(
+              item: fi.item.copyWith(
+                  overlay: overlay, clearOverlay: overlay == null));
+        }
+        return fi;
       }).toList(),
     );
   }
@@ -98,14 +130,10 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     for (final item in state.pool) {
       if (item.id == itemId) return item;
     }
+    for (final fi in state.freeItems) {
+      if (fi.item.id == itemId) return fi.item;
+    }
     return null;
-  }
-
-  double rowHeightFor(String tierRowId) {
-    return state.tiers
-        .firstWhere((r) => r.id == tierRowId,
-            orElse: () => state.tiers.first)
-        .rowHeight;
   }
 }
 

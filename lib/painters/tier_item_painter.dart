@@ -15,12 +15,6 @@ class TierItemPainter extends CustomPainter {
           0, 0, image!.width.toDouble(), image!.height.toDouble());
       final dst = Rect.fromLTWH(0, 0, size.width, size.height);
       canvas.drawImageRect(image!, src, dst, Paint());
-    } else {
-      // Text-only item: draw dark background
-      canvas.drawRect(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = const Color(0x88000000),
-      );
     }
 
     if (overlay != null && overlay!.text.isNotEmpty) {

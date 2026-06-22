@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/tier_item.dart';
 import '../models/tier_row.dart';
+import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
 import 'tier_item_widget.dart';
 import 'tier_label_widget.dart';
@@ -14,7 +15,10 @@ class TierRowWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final snap = ref.watch(snapProvider);
+
     return DragTarget<TierItem>(
+      onWillAcceptWithDetails: (_) => snap,
       onAcceptWithDetails: (details) {
         final insertIndex = _computeInsertIndex(context, details.offset, row);
         ref
