@@ -1,0 +1,4 @@
+flutter build macos --debug && open build/macos/Build/Products/Debug/tierlist.app
+
+# Hot reload (run first, then press 'r' to reload or 'R' for full restart):
+flutter run -d macos
