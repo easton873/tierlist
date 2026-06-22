@@ -24,31 +24,56 @@ class TierItemPainter extends CustomPainter {
 
   void _paintBorderedText(
       Canvas canvas, Size size, TextOverlayConfig config) {
-    double fontSize = size.height * 0.75;
-    TextPainter? tp;
+    double fontSize;
 
-    for (int i = 0; i < 20; i++) {
-      tp = _buildFillPainter(config.text, fontSize, config.textColor);
-      tp.layout(maxWidth: size.width * 0.95);
-      if (tp.size.width <= size.width * 0.95 &&
-          tp.size.height <= size.height * 0.9) {
-        break;
+    if (config.autoScale) {
+      fontSize = size.height * 0.75;
+      for (int i = 0; i < 20; i++) {
+        final probe = _buildFillPainter(config.text, fontSize, config.textColor);
+        probe.layout(maxWidth: size.width * 0.95);
+        if (probe.size.width <= size.width * 0.95 &&
+            probe.size.height <= size.height * 0.9 &&
+            !_anyWordExceedsWidth(
+                config.text, fontSize, size.width * 0.95, config.textColor)) {
+          break;
+        }
+        fontSize *= 0.88;
       }
-      fontSize *= 0.88;
+    } else {
+      fontSize = config.fontSize;
     }
 
-    if (tp == null) return;
+    // Use a very large maxWidth when not autoscaling so text isn't word-wrapped
+    // against the widget boundary — let it overflow naturally.
+    final layoutWidth =
+        config.autoScale ? size.width * 0.95 : double.infinity;
+
+    final tp = _buildFillPainter(config.text, fontSize, config.textColor);
+    tp.layout(maxWidth: layoutWidth);
 
     final borderPainter = _buildStrokePainter(
         config.text, fontSize, config.borderColor, config.borderWidth);
-    borderPainter.layout(maxWidth: size.width * 0.95);
+    borderPainter.layout(maxWidth: layoutWidth);
 
     final dx = (size.width - tp.size.width) / 2;
     final dy = (size.height - tp.size.height) / 2;
     final offset = Offset(dx, dy);
 
+    // Allow painting outside widget bounds when not autoscaling
+    if (!config.autoScale) canvas.save();
     borderPainter.paint(canvas, offset);
     tp.paint(canvas, offset);
+    if (!config.autoScale) canvas.restore();
+  }
+
+  bool _anyWordExceedsWidth(String text, double fontSize, double maxWidth, Color color) {
+    for (final word in text.split(RegExp(r'\s+'))) {
+      if (word.isEmpty) continue;
+      final tp = _buildFillPainter(word, fontSize, color);
+      tp.layout(maxWidth: double.infinity);
+      if (tp.size.width > maxWidth) return true;
+    }
+    return false;
   }
 
   TextPainter _buildFillPainter(String text, double fontSize, Color color) {

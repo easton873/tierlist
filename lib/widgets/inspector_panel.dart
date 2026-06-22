@@ -1,5 +1,6 @@
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/text_overlay_config.dart';
 import '../providers/selection_provider.dart';
@@ -14,11 +15,13 @@ class InspectorPanel extends ConsumerStatefulWidget {
 
 class _InspectorPanelState extends ConsumerState<InspectorPanel> {
   final _textController = TextEditingController();
+  final _fontSizeController = TextEditingController();
   String? _lastSelectedId;
 
   @override
   void dispose() {
     _textController.dispose();
+    _fontSizeController.dispose();
     super.dispose();
   }
 
@@ -27,9 +30,7 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
     final selectedId = ref.watch(selectionProvider);
     final state = ref.watch(tierlistProvider);
 
-    if (selectedId == null) {
-      return _empty();
-    }
+    if (selectedId == null) return _empty();
 
     final item = [
       ...state.pool,
@@ -40,17 +41,18 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
 
     final overlay = item.overlay ?? const TextOverlayConfig(text: '');
 
-    // Only sync the controller when the selected item changes,
-    // not on every keystroke (which would reset the cursor).
     if (selectedId != _lastSelectedId) {
       _lastSelectedId = selectedId;
-      // Schedule after build to avoid setState-during-build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _textController.text != overlay.text) {
+        if (!mounted) return;
+        if (_textController.text != overlay.text) {
           _textController.text = overlay.text;
-          _textController.selection = TextSelection.collapsed(
-            offset: overlay.text.length,
-          );
+          _textController.selection =
+              TextSelection.collapsed(offset: overlay.text.length);
+        }
+        final sizeStr = overlay.fontSize.round().toString();
+        if (_fontSizeController.text != sizeStr) {
+          _fontSizeController.text = sizeStr;
         }
       });
     }
@@ -101,27 +103,98 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
                     },
                   ),
                   const SizedBox(height: 16),
+
+                  // Auto-scale checkbox
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Checkbox(
+                          value: overlay.autoScale,
+                          onChanged: (val) {
+                            ref
+                                .read(tierlistProvider.notifier)
+                                .updateItemOverlay(selectedId,
+                                    overlay.copyWith(autoScale: val ?? true));
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Auto-scale text',
+                          style:
+                              TextStyle(color: Colors.white70, fontSize: 13)),
+                    ],
+                  ),
+
+                  // Font size controls (only when not autoscaling)
+                  if (!overlay.autoScale) ...[
+                    const SizedBox(height: 12),
+                    _label('Font Size'),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: overlay.fontSize.clamp(8.0, 200.0),
+                            min: 8,
+                            max: 200,
+                            onChanged: (val) {
+                              final rounded = val.roundToDouble();
+                              _fontSizeController.text =
+                                  rounded.round().toString();
+                              ref
+                                  .read(tierlistProvider.notifier)
+                                  .updateItemOverlay(selectedId,
+                                      overlay.copyWith(fontSize: rounded));
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 52,
+                          child: TextField(
+                            controller: _fontSizeController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFF2A2A2A),
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                            ),
+                            onChanged: (val) {
+                              final parsed = double.tryParse(val);
+                              if (parsed != null && parsed > 0) {
+                                ref
+                                    .read(tierlistProvider.notifier)
+                                    .updateItemOverlay(selectedId,
+                                        overlay.copyWith(fontSize: parsed));
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
                   _label('Text Color'),
                   const SizedBox(height: 6),
-                  _colorButton(
-                    context,
-                    ref,
-                    selectedId,
-                    overlay,
-                    overlay.textColor,
-                    (color) => overlay.copyWith(textColor: color),
-                  ),
+                  _colorButton(context, ref, selectedId, overlay,
+                      overlay.textColor,
+                      (color) => overlay.copyWith(textColor: color)),
                   const SizedBox(height: 16),
                   _label('Border Color'),
                   const SizedBox(height: 6),
-                  _colorButton(
-                    context,
-                    ref,
-                    selectedId,
-                    overlay,
-                    overlay.borderColor,
-                    (color) => overlay.copyWith(borderColor: color),
-                  ),
+                  _colorButton(context, ref, selectedId, overlay,
+                      overlay.borderColor,
+                      (color) => overlay.copyWith(borderColor: color)),
                   const SizedBox(height: 16),
                   _label(
                       'Border Width: ${overlay.borderWidth.toStringAsFixed(1)}'),
@@ -134,8 +207,7 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
                       ref
                           .read(tierlistProvider.notifier)
                           .updateItemOverlay(
-                              selectedId,
-                              overlay.copyWith(borderWidth: val));
+                              selectedId, overlay.copyWith(borderWidth: val));
                     },
                   ),
                 ],
