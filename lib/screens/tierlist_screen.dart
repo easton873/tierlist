@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_mode.dart';
 import '../providers/app_mode_provider.dart';
 import '../providers/snap_provider.dart';
+import '../providers/tierlist_provider.dart';
 import '../widgets/app_mode_toggle.dart';
 import '../widgets/create_item_toolbar.dart';
 import '../widgets/inspector_panel.dart';
 import '../widgets/item_pool_widget.dart';
+import '../widgets/tier_item_widget.dart';
 import '../widgets/tierlist_board.dart';
 
 class TierlistScreen extends ConsumerStatefulWidget {
@@ -30,14 +32,72 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
     super.dispose();
   }
 
+  Widget _buildBody(WidgetRef ref, bool isEdit) {
+    final freeItems = ref.watch(tierlistProvider).freeItems;
+    final tierCount = ref.watch(tierlistProvider).tiers.length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const vPad = 12.0;
+        final rowHeight = (constraints.maxHeight - vPad * 2) / tierCount;
+
+        return Stack(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Expanded(child: TierlistBoard()),
+                SizedBox(width: 220, child: const ItemPoolWidget()),
+                if (isEdit) const InspectorPanel(),
+              ],
+            ),
+            for (final fi in freeItems)
+              Positioned(
+                left: fi.position.dx,
+                top: fi.position.dy,
+                child: TierItemWidget(
+                  key: ValueKey(fi.item.id),
+                  item: fi.item,
+                  rowHeight: rowHeight,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   bool _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
-    if (event.logicalKey != LogicalKeyboardKey.keyS) return false;
-    // Don't intercept 's' while typing in a text field
-    final focus = FocusManager.instance.primaryFocus;
-    if (focus?.context?.widget is EditableText) return false;
-    ref.read(snapProvider.notifier).update((s) => !s);
-    return true;
+    final context = FocusManager.instance.primaryFocus?.context;
+    final inTextField = context != null && _isInTextField(context);
+
+    if (event.logicalKey == LogicalKeyboardKey.keyS && !inTextField) {
+      ref.read(snapProvider.notifier).update((s) => !s);
+      return true;
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.tab && !inTextField) {
+      ref.read(appModeProvider.notifier).update(
+            (m) => m == AppMode.edit ? AppMode.performance : AppMode.edit,
+          );
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _isInTextField(BuildContext context) {
+    if (context.widget is EditableText) return true;
+    bool found = false;
+    context.visitAncestorElements((element) {
+      if (element.widget is EditableText) {
+        found = true;
+        return false;
+      }
+      return true;
+    });
+    return found;
   }
 
   @override
@@ -79,19 +139,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
           const SizedBox(width: 16),
         ],
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(
-            child: TierlistBoard(),
-          ),
-          SizedBox(
-            width: 220,
-            child: const ItemPoolWidget(),
-          ),
-          if (isEdit) const InspectorPanel(),
-        ],
-      ),
+      body: _buildBody(ref, isEdit),
     );
   }
 }

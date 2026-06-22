@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/tier_item.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
-import 'tier_item_widget.dart';
 import 'tier_row_widget.dart';
 
 class TierlistBoard extends ConsumerStatefulWidget {
@@ -19,7 +18,6 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
   @override
   Widget build(BuildContext context) {
     final tiers = ref.watch(tierlistProvider).tiers;
-    final freeItems = ref.watch(tierlistProvider).freeItems;
     final snap = ref.watch(snapProvider);
 
     return LayoutBuilder(
@@ -60,16 +58,6 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
                     ],
                   ),
                 ),
-                for (final fi in freeItems)
-                  Positioned(
-                    left: fi.position.dx,
-                    top: fi.position.dy,
-                    child: TierItemWidget(
-                      key: ValueKey(fi.item.id),
-                      item: fi.item,
-                      rowHeight: rowHeight,
-                    ),
-                  ),
               ],
             );
           },
