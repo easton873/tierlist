@@ -21,7 +21,7 @@ class TierLabelWidget extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w300,
           fontSize: size * 0.4,
           color: Colors.black,
         ),
