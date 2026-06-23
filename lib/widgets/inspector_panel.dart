@@ -2,9 +2,12 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../models/text_overlay_config.dart';
 import '../providers/selection_provider.dart';
 import '../providers/tierlist_provider.dart';
+
+const _uuid = Uuid();
 
 class InspectorPanel extends ConsumerStatefulWidget {
   const InspectorPanel({super.key});
@@ -81,6 +84,24 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.content_copy, size: 15),
+                      label: const Text('Duplicate'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                        side: const BorderSide(color: Colors.white24),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      onPressed: () {
+                        ref
+                            .read(tierlistProvider.notifier)
+                            .addItemToPool(item.copyWith(id: _uuid.v4()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _label('Overlay Text'),
                   const SizedBox(height: 6),
                   TextField(

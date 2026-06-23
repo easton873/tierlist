@@ -3,11 +3,11 @@ import '../models/tier_row.dart';
 
 List<TierRow> defaultTiers() {
   return [
-    TierRow(id: 'S', label: 'S', labelColor: const Color(0xFFFF7F7F)),
-    TierRow(id: 'A', label: 'A', labelColor: const Color(0xFFFFBF7F)),
-    TierRow(id: 'B', label: 'B', labelColor: const Color(0xFFFFDF7F)),
-    TierRow(id: 'C', label: 'C', labelColor: const Color(0xFFBFFF7F)),
-    TierRow(id: 'D', label: 'D', labelColor: const Color(0xFF7FBFFF)),
-    TierRow(id: 'F', label: 'F', labelColor: const Color(0xFFBF7FFF)),
+    TierRow(id: 'S', label: 'S', labelColor: const Color(0xFFE77584)),
+    TierRow(id: 'A', label: 'A', labelColor: const Color(0xFFF7C48B)),
+    TierRow(id: 'B', label: 'B', labelColor: const Color(0xFFF8FC8F)),
+    TierRow(id: 'C', label: 'C', labelColor: const Color(0xFF92FF8B)),
+    TierRow(id: 'D', label: 'D', labelColor: const Color(0xFF8CC6FA)),
+    TierRow(id: 'F', label: 'F', labelColor: const Color(0xFFE86AEC)),
   ];
 }

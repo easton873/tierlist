@@ -1,10 +1,12 @@
 I want a macos desktop (and web) application that helps me make tierlist videos. By default there should be an S, A, B, C, D, F tiers and I should be able to change their colors. There should be two modes for this GUI, edit mode where I create all the pictures/text I'm going to tier, and a performance mode where I can drag around the pictures and put them into tiers without accidentally selecting creation tools since I'll be recording.
 
-Wishlist in order of how important it is:
+Already done features:
 - Ability to import images that will automatically scale to be the size of a tier row. By default they should retain their aspect ratio and height should match (but be a pixel or two less) the height of the row.
 - Ability to put autoscaling text on the images. The text should be white with a thick opaque black border around each letter. You should be able to change the color of both the border and the actual color of the text.
 - Ability to put text by itself with no image that has an easy to click hit box so I can drag it around with ease.
 - Add two modes to the GUI, one for creating the scene, and one for recording. You should be able to toggle between this "edit" mode and "creation" mode.
+
+Future Wishlist:
 - Ability to add new tiers to the list
 - Ability to change the tiers themselves (like switch the F tier with the A tier, or delete tiers, or change what letter is on the tier, or make the tier several letters or words instead of just a single letter)
 - When things are dragged to a tier they should snap place in the row (there should be a setting in performance mode to toggle this on or off)
