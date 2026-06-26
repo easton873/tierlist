@@ -5,7 +5,9 @@ import '../providers/tierlist_provider.dart';
 import 'tier_item_widget.dart';
 
 class ItemPoolWidget extends ConsumerWidget {
-  const ItemPoolWidget({super.key});
+  final double itemSize;
+
+  const ItemPoolWidget({super.key, required this.itemSize});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,14 +23,9 @@ class ItemPoolWidget extends ConsumerWidget {
         final isHovered = candidates.isNotEmpty;
         return Container(
           constraints: const BoxConstraints(minWidth: 120),
-          decoration: BoxDecoration(
-            color: isHovered
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey[900],
-            border: Border(
-              left: BorderSide(color: Colors.grey[700]!, width: 2),
-            ),
-          ),
+          color: isHovered
+              ? Colors.white.withValues(alpha: 0.05)
+              : const Color(0xFF121212),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -44,7 +41,7 @@ class ItemPoolWidget extends ConsumerWidget {
                           TierItemWidget(
                             key: ValueKey(item.id),
                             item: item,
-                            rowHeight: 80,
+                            rowHeight: itemSize,
                           ),
                       ],
                     ),

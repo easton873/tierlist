@@ -22,9 +22,9 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const vPad = 12.0;
+        const vPad = 50.0;
         const hPad = 12.0;
-        const rowGap = 20.0;
+        const rowGap = 32.0;
         final rowHeight =
             (constraints.maxHeight - vPad * 2 - rowGap * (tiers.length - 1)) /
             tiers.length;
@@ -47,8 +47,7 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
               key: _stackKey,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: vPad, horizontal: hPad),
+                  padding: const EdgeInsets.fromLTRB(vPad, vPad, hPad, vPad),
                   child: Column(
                     spacing: rowGap,
                     children: [

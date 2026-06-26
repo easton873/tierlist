@@ -39,29 +39,26 @@ class TierRowWidget extends ConsumerWidget {
               ),
               const SizedBox(width: 32),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Container(
-                    color: isHovered
-                        ? const Color(0xFF222522)
-                        : const Color(0xFF181B18),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            for (final item in row.items)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 1),
-                                child: TierItemWidget(
-                                  key: ValueKey(item.id),
-                                  item: item,
-                                  rowHeight: rowHeight - 16,
-                                ),
+                child: Container(
+                  color: isHovered
+                      ? const Color(0xFF222522)
+                      : const Color(0xFF181B18),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (final item in row.items)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 1),
+                              child: TierItemWidget(
+                                key: ValueKey(item.id),
+                                item: item,
+                                rowHeight: rowHeight,
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
                     ),
                   ),

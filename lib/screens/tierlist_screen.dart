@@ -20,6 +20,8 @@ class TierlistScreen extends ConsumerStatefulWidget {
 }
 
 class _TierlistScreenState extends ConsumerState<TierlistScreen> {
+  bool _headerVisible = true;
+
   @override
   void initState() {
     super.initState();
@@ -38,8 +40,12 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const vPad = 12.0;
-        final rowHeight = (constraints.maxHeight - vPad * 2) / tierCount;
+        // Must match tierlist_board.dart constants exactly
+        const vPad = 50.0;
+        const rowGap = 32.0;
+        final itemSize =
+            (constraints.maxHeight - vPad * 2 - rowGap * (tierCount - 1)) /
+            tierCount;
 
         return Stack(
           children: [
@@ -47,7 +53,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Expanded(child: TierlistBoard()),
-                SizedBox(width: 220, child: const ItemPoolWidget()),
+                SizedBox(width: 220, child: ItemPoolWidget(itemSize: itemSize)),
                 if (isEdit) const InspectorPanel(),
               ],
             ),
@@ -58,7 +64,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                 child: TierItemWidget(
                   key: ValueKey(fi.item.id),
                   item: fi.item,
-                  rowHeight: rowHeight,
+                  rowHeight: itemSize,
                 ),
               ),
           ],
@@ -72,15 +78,23 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
     final context = FocusManager.instance.primaryFocus?.context;
     final inTextField = context != null && _isInTextField(context);
 
+    if (event.logicalKey == LogicalKeyboardKey.tab) {
+      setState(() => _headerVisible = !_headerVisible);
+      return true;
+    }
+
     if (event.logicalKey == LogicalKeyboardKey.keyS && !inTextField) {
       ref.read(snapProvider.notifier).update((s) => !s);
       return true;
     }
 
-    if (event.logicalKey == LogicalKeyboardKey.tab && !inTextField) {
-      ref.read(appModeProvider.notifier).update(
-            (m) => m == AppMode.edit ? AppMode.performance : AppMode.edit,
-          );
+    if (event.logicalKey == LogicalKeyboardKey.keyE && !inTextField) {
+      ref.read(appModeProvider.notifier).update((_) => AppMode.edit);
+      return true;
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.keyP && !inTextField) {
+      ref.read(appModeProvider.notifier).update((_) => AppMode.performance);
       return true;
     }
 
@@ -112,7 +126,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
-      appBar: AppBar(
+      appBar: _headerVisible ? AppBar(
         backgroundColor: appBarColor,
         title: const Text('Tierlist', style: TextStyle(color: Colors.white)),
         actions: [
@@ -138,7 +152,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
           const AppModeToggle(),
           const SizedBox(width: 16),
         ],
-      ),
+      ) : null,
       body: _buildBody(ref, isEdit),
     );
   }
