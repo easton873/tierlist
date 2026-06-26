@@ -27,37 +27,43 @@ class TierRowWidget extends ConsumerWidget {
       },
       builder: (context, candidates, rejected) {
         final isHovered = candidates.isNotEmpty;
-        return Container(
+        return SizedBox(
           height: rowHeight,
-          decoration: BoxDecoration(
-            color: isHovered
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.transparent,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[800]!, width: 1),
-            ),
-          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TierLabelWidget(
-                  label: row.label, color: row.labelColor, size: rowHeight),
-              Container(width: 1, color: Colors.grey[800]),
+                label: row.label,
+                color: row.labelColor,
+                size: rowHeight,
+              ),
+              const SizedBox(width: 32),
               Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (final item in row.items)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 1),
-                          child: TierItemWidget(
-                            key: ValueKey(item.id),
-                            item: item,
-                            rowHeight: rowHeight,
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Container(
+                    color: isHovered
+                        ? const Color(0xFF222522)
+                        : const Color(0xFF181B18),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            for (final item in row.items)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 1),
+                                child: TierItemWidget(
+                                  key: ValueKey(item.id),
+                                  item: item,
+                                  rowHeight: rowHeight - 16,
+                                ),
+                              ),
+                          ],
                         ),
-                    ],
+                      ),
+                    ),
                   ),
                 ),
               ),

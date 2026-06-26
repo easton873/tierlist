@@ -24,8 +24,10 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
       builder: (context, constraints) {
         const vPad = 12.0;
         const hPad = 12.0;
+        const rowGap = 20.0;
         final rowHeight =
-            (constraints.maxHeight - vPad * 2) / tiers.length;
+            (constraints.maxHeight - vPad * 2 - rowGap * (tiers.length - 1)) /
+            tiers.length;
 
         return DragTarget<TierItem>(
           // Only accepts drops when snap is OFF (tier rows reject in that mode)
@@ -48,6 +50,7 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
                   padding: const EdgeInsets.symmetric(
                       vertical: vPad, horizontal: hPad),
                   child: Column(
+                    spacing: rowGap,
                     children: [
                       for (final row in tiers)
                         TierRowWidget(
