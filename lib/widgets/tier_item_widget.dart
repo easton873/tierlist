@@ -22,18 +22,23 @@ class TierItemWidget extends ConsumerStatefulWidget {
 }
 
 class _TierItemWidgetState extends ConsumerState<TierItemWidget> {
+  static final Map<String, ui.Image> _imageCache = {};
+
   ui.Image? _cachedImage;
 
   @override
   void initState() {
     super.initState();
-    _loadImage();
+    _cachedImage = _imageCache[widget.item.id];
+    if (_cachedImage == null) _loadImage();
   }
 
   @override
   void didUpdateWidget(TierItemWidget old) {
     super.didUpdateWidget(old);
     if (old.item.imageBytes != widget.item.imageBytes) {
+      _imageCache.remove(widget.item.id);
+      _cachedImage = null;
       _loadImage();
     }
   }
@@ -41,6 +46,7 @@ class _TierItemWidgetState extends ConsumerState<TierItemWidget> {
   void _loadImage() {
     if (widget.item.imageBytes == null) return;
     ui.decodeImageFromList(widget.item.imageBytes!, (img) {
+      _imageCache[widget.item.id] = img;
       if (mounted) setState(() => _cachedImage = img);
     });
   }

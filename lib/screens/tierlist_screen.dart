@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_mode.dart';
+import '../models/tier_item.dart';
 import '../providers/app_mode_provider.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
@@ -21,6 +22,7 @@ class TierlistScreen extends ConsumerStatefulWidget {
 
 class _TierlistScreenState extends ConsumerState<TierlistScreen> {
   bool _headerVisible = true;
+  final _bodyStackKey = GlobalKey();
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
   Widget _buildBody(WidgetRef ref, bool isEdit) {
     final freeItems = ref.watch(tierlistProvider).freeItems;
     final tierCount = ref.watch(tierlistProvider).tiers.length;
+    final snap = ref.watch(snapProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -47,27 +50,41 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
             (constraints.maxHeight - vPad * 2 - rowGap * (tierCount - 1)) /
             tierCount;
 
-        return Stack(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        return DragTarget<TierItem>(
+          onWillAcceptWithDetails: (_) => !snap,
+          onAcceptWithDetails: (details) {
+            final rb =
+                _bodyStackKey.currentContext?.findRenderObject() as RenderBox?;
+            final localPos = rb != null
+                ? rb.globalToLocal(details.offset)
+                : details.offset;
+            ref.read(tierlistProvider.notifier).placeFreeItem(details.data, localPos);
+          },
+          builder: (context, candidates, rejected) {
+            return Stack(
+              key: _bodyStackKey,
               children: [
-                const Expanded(child: TierlistBoard()),
-                SizedBox(width: 220, child: ItemPoolWidget(itemSize: itemSize)),
-                if (isEdit) const InspectorPanel(),
-              ],
-            ),
-            for (final fi in freeItems)
-              Positioned(
-                left: fi.position.dx,
-                top: fi.position.dy,
-                child: TierItemWidget(
-                  key: ValueKey(fi.item.id),
-                  item: fi.item,
-                  rowHeight: itemSize,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Expanded(child: TierlistBoard()),
+                    SizedBox(width: 220, child: ItemPoolWidget(itemSize: itemSize)),
+                    if (isEdit) const InspectorPanel(),
+                  ],
                 ),
-              ),
-          ],
+                for (final fi in freeItems)
+                  Positioned(
+                    left: fi.position.dx,
+                    top: fi.position.dy,
+                    child: TierItemWidget(
+                      key: ValueKey(fi.item.id),
+                      item: fi.item,
+                      rowHeight: itemSize,
+                    ),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
