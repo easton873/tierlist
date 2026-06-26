@@ -1,33 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/layout_settings_provider.dart';
 import '../providers/tierlist_provider.dart';
 import 'tier_row_widget.dart';
 
-class TierlistBoard extends ConsumerStatefulWidget {
+class TierlistBoard extends ConsumerWidget {
   const TierlistBoard({super.key});
 
   @override
-  ConsumerState<TierlistBoard> createState() => _TierlistBoardState();
-}
-
-class _TierlistBoardState extends ConsumerState<TierlistBoard> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tiers = ref.watch(tierlistProvider).tiers;
+    final s = ref.watch(layoutSettingsProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const vPad = 50.0;
         const hPad = 12.0;
-        const rowGap = 32.0;
         final rowHeight =
-            (constraints.maxHeight - vPad * 2 - rowGap * (tiers.length - 1)) /
+            (constraints.maxHeight - s.boardTopPad - s.boardBottomPad -
+                s.rowGap * (tiers.length - 1)) /
             tiers.length;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(vPad, vPad, hPad, vPad),
+          padding: EdgeInsets.fromLTRB(
+              s.boardLeftPad, s.boardTopPad, hPad, s.boardBottomPad),
           child: Column(
-            spacing: rowGap,
+            spacing: s.rowGap,
             children: [
               for (final row in tiers)
                 TierRowWidget(

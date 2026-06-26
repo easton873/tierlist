@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_mode.dart';
 import '../models/tier_item.dart';
 import '../providers/app_mode_provider.dart';
+import '../providers/layout_settings_provider.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
 import '../widgets/app_mode_toggle.dart';
 import '../widgets/create_item_toolbar.dart';
 import '../widgets/inspector_panel.dart';
 import '../widgets/item_pool_widget.dart';
+import '../widgets/padding_settings_button.dart';
 import '../widgets/tier_item_widget.dart';
 import '../widgets/tierlist_board.dart';
 
@@ -43,11 +45,10 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Must match tierlist_board.dart constants exactly
-        const vPad = 50.0;
-        const rowGap = 32.0;
+        final s = ref.watch(layoutSettingsProvider);
         final itemSize =
-            (constraints.maxHeight - vPad * 2 - rowGap * (tierCount - 1)) /
+            (constraints.maxHeight - s.boardTopPad - s.boardBottomPad -
+                s.rowGap * (tierCount - 1)) /
             tierCount;
 
         return DragTarget<TierItem>(
@@ -164,6 +165,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                     ref.read(snapProvider.notifier).update((s) => !s),
               ),
             ),
+            const PaddingSettingsButton(),
           ],
           const SizedBox(width: 8),
           const AppModeToggle(),

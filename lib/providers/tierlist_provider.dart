@@ -90,6 +90,18 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     state = state.copyWith(tiers: newTiers, pool: newPool, freeItems: newFree);
   }
 
+  void deleteItem(String itemId) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((row) => row.copyWith(
+                items: row.items.where((i) => i.id != itemId).toList(),
+              ))
+          .toList(),
+      pool: state.pool.where((i) => i.id != itemId).toList(),
+      freeItems: state.freeItems.where((f) => f.item.id != itemId).toList(),
+    );
+  }
+
   void updateItemOverlay(String itemId, TextOverlayConfig? overlay) {
     state = state.copyWith(
       tiers: state.tiers.map((row) {

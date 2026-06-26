@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/tier_item.dart';
+import '../providers/layout_settings_provider.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
 import 'tier_item_widget.dart';
@@ -14,6 +15,7 @@ class ItemPoolWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pool = ref.watch(tierlistProvider).pool;
     final snap = ref.watch(snapProvider);
+    final poolPad = ref.watch(layoutSettingsProvider).poolPadding;
 
     return DragTarget<TierItem>(
       onWillAcceptWithDetails: (_) => snap,
@@ -35,7 +37,7 @@ class ItemPoolWidget extends ConsumerWidget {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 24, 24, 24),
+                    padding: EdgeInsets.fromLTRB(4, poolPad, poolPad, poolPad),
                     child: Wrap(
                       spacing: 4,
                       runSpacing: 4,

@@ -84,22 +84,45 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.content_copy, size: 15),
-                      label: const Text('Duplicate'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white70,
-                        side: const BorderSide(color: Colors.white24),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.content_copy, size: 15),
+                          label: const Text('Duplicate'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                            side: const BorderSide(color: Colors.white24),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(tierlistProvider.notifier)
+                                .addItemToPool(item.copyWith(id: _uuid.v4()));
+                          },
+                        ),
                       ),
-                      onPressed: () {
-                        ref
-                            .read(tierlistProvider.notifier)
-                            .addItemToPool(item.copyWith(id: _uuid.v4()));
-                      },
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.delete_outline, size: 15),
+                          label: const Text('Delete'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red[300],
+                            side: BorderSide(color: Colors.red[900]!),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(selectionProvider.notifier)
+                                .state = null;
+                            ref
+                                .read(tierlistProvider.notifier)
+                                .deleteItem(selectedId);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   _label('Overlay Text'),

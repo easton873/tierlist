@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/tier_item.dart';
 import '../models/tier_row.dart';
+import '../providers/layout_settings_provider.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
 import 'tier_item_widget.dart';
@@ -16,6 +17,7 @@ class TierRowWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final snap = ref.watch(snapProvider);
+    final labelGap = ref.watch(layoutSettingsProvider).labelGap;
 
     return DragTarget<TierItem>(
       onWillAcceptWithDetails: (_) => snap,
@@ -37,7 +39,7 @@ class TierRowWidget extends ConsumerWidget {
                 color: row.labelColor,
                 size: rowHeight,
               ),
-              const SizedBox(width: 32),
+              SizedBox(width: labelGap),
               Expanded(
                 child: Container(
                   color: isHovered

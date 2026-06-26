@@ -1,0 +1,54 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class LayoutSettings {
+  final double boardTopPad;
+  final double boardBottomPad;
+  final double boardLeftPad;
+  final double rowGap;
+  final double labelGap;
+  final double poolPadding;
+
+  const LayoutSettings({
+    this.boardTopPad = 50.0,
+    this.boardBottomPad = 50.0,
+    this.boardLeftPad = 50.0,
+    this.rowGap = 32.0,
+    this.labelGap = 32.0,
+    this.poolPadding = 16.0,
+  });
+
+  LayoutSettings copyWith({
+    double? boardTopPad,
+    double? boardBottomPad,
+    double? boardLeftPad,
+    double? rowGap,
+    double? labelGap,
+    double? poolPadding,
+  }) {
+    return LayoutSettings(
+      boardTopPad: boardTopPad ?? this.boardTopPad,
+      boardBottomPad: boardBottomPad ?? this.boardBottomPad,
+      boardLeftPad: boardLeftPad ?? this.boardLeftPad,
+      rowGap: rowGap ?? this.rowGap,
+      labelGap: labelGap ?? this.labelGap,
+      poolPadding: poolPadding ?? this.poolPadding,
+    );
+  }
+}
+
+class LayoutSettingsNotifier extends StateNotifier<LayoutSettings> {
+  LayoutSettingsNotifier() : super(const LayoutSettings());
+
+  void update(LayoutSettings Function(LayoutSettings) updater) {
+    state = updater(state);
+  }
+
+  void resetToDefaults() {
+    state = const LayoutSettings();
+  }
+}
+
+final layoutSettingsProvider =
+    StateNotifierProvider<LayoutSettingsNotifier, LayoutSettings>(
+      (ref) => LayoutSettingsNotifier(),
+    );
