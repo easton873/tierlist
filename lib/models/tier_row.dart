@@ -11,6 +11,8 @@ class TierRow {
   final double? fontSize;
   // non-null = image-background row; image spans full row width
   final Uint8List? backgroundImage;
+  // non-null = solid color full-width row (blank row)
+  final Color? backgroundColor;
   // null = use the auto-calculated height (viewport / 6); non-null = fixed px height
   final double? customHeight;
 
@@ -21,9 +23,13 @@ class TierRow {
     this.items = const [],
     this.fontSize,
     this.backgroundImage,
+    this.backgroundColor,
     this.customHeight,
   });
 
+  // true when the row spans full width (image or solid color), no label shown
+  bool get isFullWidthRow => backgroundImage != null || backgroundColor != null;
+  // kept for backwards compat in rendering checks
   bool get isImageRow => backgroundImage != null;
 
   TierRow copyWith({
@@ -35,6 +41,8 @@ class TierRow {
     bool clearFontSize = false,
     Uint8List? backgroundImage,
     bool clearBackgroundImage = false,
+    Color? backgroundColor,
+    bool clearBackgroundColor = false,
     double? customHeight,
     bool clearCustomHeight = false,
   }) {
@@ -45,6 +53,7 @@ class TierRow {
       items: items ?? this.items,
       fontSize: clearFontSize ? null : (fontSize ?? this.fontSize),
       backgroundImage: clearBackgroundImage ? null : (backgroundImage ?? this.backgroundImage),
+      backgroundColor: clearBackgroundColor ? null : (backgroundColor ?? this.backgroundColor),
       customHeight: clearCustomHeight ? null : (customHeight ?? this.customHeight),
     );
   }

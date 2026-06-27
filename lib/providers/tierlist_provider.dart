@@ -179,6 +179,16 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     );
   }
 
+  void addBlankTier() {
+    final newTier = TierRow(
+      id: _uuid.v4(),
+      label: '',
+      labelColor: Colors.transparent,
+      backgroundColor: const Color(0xFF121212),
+    );
+    state = state.copyWith(tiers: [...state.tiers, newTier]);
+  }
+
   void addImageTier(Uint8List bytes) {
     final newTier = TierRow(
       id: _uuid.v4(),
@@ -194,6 +204,16 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
       tiers: state.tiers
           .map((r) => r.id == tierId
               ? r.copyWith(customHeight: height, clearCustomHeight: height == null)
+              : r)
+          .toList(),
+    );
+  }
+
+  void updateTierBackgroundColor(String tierId, Color? color) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId
+              ? r.copyWith(backgroundColor: color, clearBackgroundColor: color == null)
               : r)
           .toList(),
     );

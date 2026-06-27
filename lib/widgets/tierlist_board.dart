@@ -62,7 +62,7 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
                   key: ValueKey(row.id),
                   row: row,
                   rowHeight: effectiveHeight(row),
-                  leftPad: row.isImageRow ? 0.0 : s.boardLeftPad,
+                  leftPad: row.isFullWidthRow ? 0.0 : s.boardLeftPad,
                 ),
               _AddTierButton(rowHeight: rowHeight),
             ],
@@ -103,6 +103,8 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
   }
 }
 
+enum _AddTierType { normal, image, blank }
+
 class _AddTierButton extends ConsumerWidget {
   final double rowHeight;
   const _AddTierButton({required this.rowHeight});
@@ -112,36 +114,57 @@ class _AddTierButton extends ConsumerWidget {
     final isEdit = ref.watch(appModeProvider) == AppMode.edit;
     if (!isEdit) return const SizedBox.shrink();
 
-    final buttonStyle = OutlinedButton.styleFrom(
-      foregroundColor: Colors.white54,
-      side: const BorderSide(color: Colors.white24),
-    );
+    final s = ref.watch(layoutSettingsProvider);
 
     return SizedBox(
       height: rowHeight,
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            OutlinedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Add Tier'),
-              style: buttonStyle,
-              onPressed: () => ref.read(tierlistProvider.notifier).addTier(),
-            ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.image_outlined),
-              label: const Text('Add Image Tier'),
-              style: buttonStyle,
-              onPressed: () async {
-                final bytes = await pickImageBytes();
-                if (bytes != null) {
-                  ref.read(tierlistProvider.notifier).addImageTier(bytes);
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.only(left: s.boardLeftPad),
+          child: SizedBox(
+            width: rowHeight,
+            height: rowHeight,
+            child: PopupMenuButton<_AddTierType>(
+              tooltip: 'Add tier',
+              offset: const Offset(0, 4),
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: _AddTierType.normal,
+                  child: Text('Normal Tier'),
+                ),
+                PopupMenuItem(
+                  value: _AddTierType.image,
+                  child: Text('Image Tier'),
+                ),
+                PopupMenuItem(
+                  value: _AddTierType.blank,
+                  child: Text('Blank Row'),
+                ),
+              ],
+              onSelected: (type) async {
+                final notifier = ref.read(tierlistProvider.notifier);
+                switch (type) {
+                  case _AddTierType.normal:
+                    notifier.addTier();
+                  case _AddTierType.image:
+                    final bytes = await pickImageBytes();
+                    if (bytes != null) notifier.addImageTier(bytes);
+                  case _AddTierType.blank:
+                    notifier.addBlankTier();
                 }
               },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white24),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Center(
+                  child: Icon(Icons.add, color: Colors.white54, size: 22),
+                ),
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );

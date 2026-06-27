@@ -28,24 +28,31 @@ class TierRowWidget extends ConsumerWidget {
     final mode = ref.watch(appModeProvider);
     final isEdit = mode == AppMode.edit;
 
-    return row.isImageRow
-        ? _buildImageRow(context, ref, isEdit)
+    return row.isFullWidthRow
+        ? _buildFullWidthRow(context, ref, isEdit)
         : _buildNormalRow(context, ref, isEdit);
   }
 
-  // ── Image-background row ─────────────────────────────────────────────────
+  // ── Full-width row (image or solid color) ────────────────────────────────
 
-  Widget _buildImageRow(BuildContext context, WidgetRef ref, bool isEdit) {
+  Widget _buildFullWidthRow(BuildContext context, WidgetRef ref, bool isEdit) {
     final snap = ref.watch(snapProvider);
 
-    Widget imageContent = Container(
-      height: rowHeight,
-      decoration: BoxDecoration(
+    BoxDecoration decoration;
+    if (row.backgroundImage != null) {
+      decoration = BoxDecoration(
         image: DecorationImage(
           image: MemoryImage(row.backgroundImage!),
           fit: BoxFit.fill,
         ),
-      ),
+      );
+    } else {
+      decoration = BoxDecoration(color: row.backgroundColor);
+    }
+
+    Widget imageContent = Container(
+      height: rowHeight,
+      decoration: decoration,
       child: Align(
         alignment: Alignment.centerRight,
         child: SingleChildScrollView(
@@ -109,14 +116,7 @@ class TierRowWidget extends ConsumerWidget {
             child: SizedBox(
               width: 300,
               height: rowHeight,
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: MemoryImage(row.backgroundImage!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              child: Container(decoration: decoration),
             ),
           ),
         ),
@@ -290,6 +290,12 @@ class TierRowWidget extends ConsumerWidget {
       notifier.updateTierBackgroundImage(row.id, null);
     } else if (result.backgroundImage != null) {
       notifier.updateTierBackgroundImage(row.id, result.backgroundImage);
+    }
+
+    if (result.clearBackgroundColor) {
+      notifier.updateTierBackgroundColor(row.id, null);
+    } else if (result.backgroundColor != null && result.backgroundColor != row.backgroundColor) {
+      notifier.updateTierBackgroundColor(row.id, result.backgroundColor);
     }
 
     if (result.clearCustomHeight) {

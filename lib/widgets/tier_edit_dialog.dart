@@ -15,6 +15,8 @@ class TierEditResult {
   final double? fontSize;
   final Uint8List? backgroundImage;
   final bool clearBackgroundImage;
+  final Color? backgroundColor;
+  final bool clearBackgroundColor;
   // null = default height (viewport / 6)
   final double? customHeight;
   final bool clearCustomHeight;
@@ -26,6 +28,8 @@ class TierEditResult {
     this.fontSize,
     this.backgroundImage,
     this.clearBackgroundImage = false,
+    this.backgroundColor,
+    this.clearBackgroundColor = false,
     this.customHeight,
     this.clearCustomHeight = false,
   });
@@ -47,6 +51,8 @@ class _TierEditDialogState extends State<TierEditDialog> {
   double? _fontSize;
   Uint8List? _backgroundImage;
   bool _imageCleared = false;
+  Color? _backgroundColor;
+  bool _bgColorCleared = false;
   double? _customHeight;
   bool _heightCleared = false;
   late final TextEditingController _heightController;
@@ -58,6 +64,7 @@ class _TierEditDialogState extends State<TierEditDialog> {
     _color = widget.row.labelColor;
     _fontSize = widget.row.fontSize;
     _backgroundImage = widget.row.backgroundImage;
+    _backgroundColor = widget.row.backgroundColor;
     _customHeight = widget.row.customHeight;
     _fontSizeController = TextEditingController(
       text: _fontSize != null ? _fontSize!.round().toString() : '',
@@ -83,6 +90,8 @@ class _TierEditDialogState extends State<TierEditDialog> {
       action: action,
       backgroundImage: _backgroundImage != widget.row.backgroundImage ? _backgroundImage : null,
       clearBackgroundImage: _imageCleared,
+      backgroundColor: _backgroundColor != widget.row.backgroundColor ? _backgroundColor : null,
+      clearBackgroundColor: _bgColorCleared,
       customHeight: _customHeight,
       clearCustomHeight: _heightCleared,
     );
@@ -154,7 +163,7 @@ class _TierEditDialogState extends State<TierEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isImageRow = _backgroundImage != null;
+    final isFullWidthRow = _backgroundImage != null || _backgroundColor != null;
 
     return AlertDialog(
       title: const Text('Edit Tier'),
@@ -195,6 +204,53 @@ class _TierEditDialogState extends State<TierEditDialog> {
                     ),
                   ],
                 ),
+              ] else if (_backgroundColor != null) ...[
+                // Blank row — show color swatch with picker
+                GestureDetector(
+                  onTap: () async {
+                    Color picked = _backgroundColor!;
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Pick Color'),
+                        content: ColorPicker(
+                          color: _backgroundColor!,
+                          onColorChanged: (c) => picked = c,
+                          pickersEnabled: const {
+                            ColorPickerType.both: false,
+                            ColorPickerType.primary: true,
+                            ColorPickerType.accent: false,
+                            ColorPickerType.bw: true,
+                            ColorPickerType.custom: false,
+                            ColorPickerType.wheel: true,
+                          },
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('OK')),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) setState(() => _backgroundColor = picked);
+                  },
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _backgroundColor,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.image_outlined),
+                  label: const Text('Use Image Instead'),
+                  onPressed: _pickBackgroundImage,
+                ),
               ] else ...[
                 OutlinedButton.icon(
                   icon: const Icon(Icons.image_outlined),
@@ -203,14 +259,14 @@ class _TierEditDialogState extends State<TierEditDialog> {
                 ),
               ],
 
-              // Label and color only shown for non-image rows
-              if (!isImageRow) ...[
+              // Label and color only shown for normal (non-full-width) rows
+              if (!isFullWidthRow) ...[
                 const SizedBox(height: 16),
                 const Text('Label', style: TextStyle(fontSize: 12, color: Colors.white70)),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _labelController,
-                  autofocus: !isImageRow,
+                  autofocus: !isFullWidthRow,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
