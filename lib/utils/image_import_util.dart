@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../models/tier_item.dart';
@@ -18,4 +19,13 @@ Future<TierItem?> pickImageItem() async {
     imageBytes: file.bytes,
     imageName: file.name,
   );
+}
+
+Future<Uint8List?> pickImageBytes() async {
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.image,
+    withData: true,
+  );
+  if (result == null || result.files.isEmpty) return null;
+  return result.files.first.bytes;
 }

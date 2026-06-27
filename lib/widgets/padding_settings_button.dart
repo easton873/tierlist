@@ -17,7 +17,7 @@ class _PaddingSettingsButtonState extends ConsumerState<PaddingSettingsButton> {
 
   void _open() {
     _overlayEntry = OverlayEntry(
-      builder: (_) => _PaddingSettingsPanel(
+      builder: (_) => _LayoutPanel(
         layerLink: _layerLink,
         onClose: _close,
       ),
@@ -49,7 +49,7 @@ class _PaddingSettingsButtonState extends ConsumerState<PaddingSettingsButton> {
     return CompositedTransformTarget(
       link: _layerLink,
       child: Tooltip(
-        message: 'Layout padding',
+        message: 'Layout',
         child: IconButton(
           icon: const Icon(Icons.tune, size: 20, color: Colors.white),
           onPressed: _toggle,
@@ -59,22 +59,22 @@ class _PaddingSettingsButtonState extends ConsumerState<PaddingSettingsButton> {
   }
 }
 
-class _PaddingSettingsPanel extends ConsumerStatefulWidget {
+class _LayoutPanel extends ConsumerStatefulWidget {
   final LayerLink layerLink;
   final VoidCallback onClose;
 
-  const _PaddingSettingsPanel({
+  const _LayoutPanel({
     required this.layerLink,
     required this.onClose,
   });
 
   @override
-  ConsumerState<_PaddingSettingsPanel> createState() =>
-      _PaddingSettingsPanelState();
+  ConsumerState<_LayoutPanel> createState() => _LayoutPanelState();
 }
 
-class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
+class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
   late final Map<String, TextEditingController> _controllers;
+  late final TextEditingController _defaultHeightController;
 
   @override
   void initState() {
@@ -88,11 +88,15 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
       'labelGap': TextEditingController(text: _fmt(s.labelGap)),
       'poolPadding': TextEditingController(text: _fmt(s.poolPadding)),
     };
+    _defaultHeightController = TextEditingController(
+      text: s.defaultRowHeight != null ? _fmt(s.defaultRowHeight!) : '',
+    );
   }
 
   @override
   void dispose() {
     for (final c in _controllers.values) c.dispose();
+    _defaultHeightController.dispose();
     super.dispose();
   }
 
@@ -141,10 +145,10 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(layoutSettingsProvider);
+    final hasCustomHeight = s.defaultRowHeight != null;
 
     return Stack(
       children: [
-        // Dismiss on outside tap
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -172,7 +176,7 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
                       Row(
                         children: [
                           const Text(
-                            'Layout Padding',
+                            'Layout',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -182,11 +186,7 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
                           const Spacer(),
                           GestureDetector(
                             onTap: widget.onClose,
-                            child: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Colors.white54,
-                            ),
+                            child: const Icon(Icons.close, size: 16, color: Colors.white54),
                           ),
                         ],
                       ),
@@ -197,7 +197,95 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
                       _row('Row gap', 'rowGap', s.rowGap, 80),
                       _row('Label gap', 'labelGap', s.labelGap, 80),
                       _row('Pool padding', 'poolPadding', s.poolPadding, 60),
-                      const SizedBox(height: 6),
+                      const Divider(color: Colors.white12, height: 20),
+                      // Default row height
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 100,
+                              child: Text(
+                                'Default height',
+                                style: TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ),
+                            Expanded(
+                              child: SliderTheme(
+                                data: SliderTheme.of(context).copyWith(
+                                  trackHeight: 2,
+                                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                ),
+                                child: Slider(
+                                  value: (s.defaultRowHeight ?? 100).clamp(30.0, 400.0),
+                                  min: 30,
+                                  max: 400,
+                                  onChanged: (v) {
+                                    final rounded = v.roundToDouble();
+                                    ref.read(layoutSettingsProvider.notifier).update(
+                                          (s) => s.copyWith(defaultRowHeight: rounded),
+                                        );
+                                    _defaultHeightController.text = _fmt(rounded);
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 52,
+                              child: TextField(
+                                controller: _defaultHeightController,
+                                style: const TextStyle(color: Colors.white, fontSize: 12),
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white24),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white54),
+                                  ),
+                                ),
+                                onSubmitted: (v) {
+                                  final parsed = double.tryParse(v);
+                                  if (parsed != null && parsed >= 1) {
+                                    final clamped = parsed.clamp(30.0, double.infinity);
+                                    ref.read(layoutSettingsProvider.notifier).update(
+                                          (s) => s.copyWith(defaultRowHeight: clamped),
+                                        );
+                                    _defaultHeightController.text = _fmt(clamped);
+                                  } else {
+                                    _defaultHeightController.text =
+                                        s.defaultRowHeight != null ? _fmt(s.defaultRowHeight!) : '';
+                                  }
+                                },
+                                onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: hasCustomHeight
+                              ? () {
+                                  ref.read(layoutSettingsProvider.notifier).update(
+                                        (s) => s.copyWith(clearDefaultRowHeight: true),
+                                      );
+                                  _defaultHeightController.clear();
+                                }
+                              : null,
+                          child: const Text(
+                            'Auto (default)',
+                            style: TextStyle(fontSize: 12, color: Colors.white54),
+                          ),
+                        ),
+                      ),
+                      const Divider(color: Colors.white12, height: 12),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -210,6 +298,7 @@ class _PaddingSettingsPanelState extends ConsumerState<_PaddingSettingsPanel> {
                             _controllers['rowGap']!.text = _fmt(d.rowGap);
                             _controllers['labelGap']!.text = _fmt(d.labelGap);
                             _controllers['poolPadding']!.text = _fmt(d.poolPadding);
+                            _defaultHeightController.clear();
                           },
                           child: const Text(
                             'Restore defaults',

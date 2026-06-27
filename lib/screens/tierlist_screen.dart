@@ -46,10 +46,11 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final s = ref.watch(layoutSettingsProvider);
-        final itemSize =
+        final autoItemSize =
             (constraints.maxHeight - s.boardTopPad - s.boardBottomPad -
                 s.rowGap * 5) /
             6;
+        final itemSize = s.defaultRowHeight ?? autoItemSize;
 
         return DragTarget<TierItem>(
           onWillAcceptWithDetails: (_) => !snap,

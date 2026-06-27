@@ -6,6 +6,7 @@ import '../providers/app_mode_provider.dart';
 import '../providers/canvas_provider.dart';
 import '../providers/layout_settings_provider.dart';
 import '../providers/tierlist_provider.dart';
+import '../utils/image_import_util.dart';
 import 'tier_row_widget.dart';
 
 class TierlistBoard extends ConsumerStatefulWidget {
@@ -29,13 +30,17 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
         const hPad = 12.0;
         const baseRowCount = 6;
 
-        final rowHeight = (constraints.maxHeight -
+        final autoRowHeight = (constraints.maxHeight -
                 s.boardTopPad -
                 s.boardBottomPad -
                 s.rowGap * (baseRowCount - 1)) /
             baseRowCount;
+        final rowHeight = s.defaultRowHeight ?? autoRowHeight;
 
-        final tierContentHeight = rowHeight * tiers.length +
+        // Each row uses its custom height if set, otherwise the calculated default
+        double effectiveHeight(row) => row.customHeight ?? rowHeight;
+
+        final tierContentHeight = tiers.fold(0.0, (sum, r) => sum + effectiveHeight(r)) +
             s.rowGap * max(0, tiers.length - 1);
         final totalContentHeight = s.boardTopPad +
             s.boardBottomPad +
@@ -46,8 +51,8 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
             (totalContentHeight - constraints.maxHeight).clamp(0.0, double.infinity);
 
         Widget content = Padding(
-          padding: EdgeInsets.fromLTRB(
-              s.boardLeftPad, s.boardTopPad, hPad, s.boardBottomPad),
+          // boardLeftPad is now applied per-row so image rows can go edge-to-edge
+          padding: EdgeInsets.fromLTRB(0, s.boardTopPad, hPad, s.boardBottomPad),
           child: Column(
             spacing: s.rowGap,
             mainAxisSize: MainAxisSize.min,
@@ -56,7 +61,8 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
                 TierRowWidget(
                   key: ValueKey(row.id),
                   row: row,
-                  rowHeight: rowHeight,
+                  rowHeight: effectiveHeight(row),
+                  leftPad: row.isImageRow ? 0.0 : s.boardLeftPad,
                 ),
               _AddTierButton(rowHeight: rowHeight),
             ],
@@ -79,7 +85,6 @@ class _TierlistBoardState extends ConsumerState<TierlistBoard> {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onPanUpdate: (details) {
-              // dragging down (positive delta.dy) pans canvas up (reveals content below)
               ref.read(canvasProvider.notifier).pan(
                     Offset(0, -details.delta.dy),
                     maxDown: maxDown,
@@ -107,17 +112,36 @@ class _AddTierButton extends ConsumerWidget {
     final isEdit = ref.watch(appModeProvider) == AppMode.edit;
     if (!isEdit) return const SizedBox.shrink();
 
+    final buttonStyle = OutlinedButton.styleFrom(
+      foregroundColor: Colors.white54,
+      side: const BorderSide(color: Colors.white24),
+    );
+
     return SizedBox(
       height: rowHeight,
       child: Center(
-        child: OutlinedButton.icon(
-          icon: const Icon(Icons.add),
-          label: const Text('Add Tier'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.white54,
-            side: const BorderSide(color: Colors.white24),
-          ),
-          onPressed: () => ref.read(tierlistProvider.notifier).addTier(),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Add Tier'),
+              style: buttonStyle,
+              onPressed: () => ref.read(tierlistProvider.notifier).addTier(),
+            ),
+            const SizedBox(width: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.image_outlined),
+              label: const Text('Add Image Tier'),
+              style: buttonStyle,
+              onPressed: () async {
+                final bytes = await pickImageBytes();
+                if (bytes != null) {
+                  ref.read(tierlistProvider.notifier).addImageTier(bytes);
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

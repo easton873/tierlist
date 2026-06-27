@@ -7,6 +7,8 @@ class LayoutSettings {
   final double rowGap;
   final double labelGap;
   final double poolPadding;
+  // null = auto (viewport / 6); non-null = fixed px for all non-custom rows
+  final double? defaultRowHeight;
 
   const LayoutSettings({
     this.boardTopPad = 50.0,
@@ -15,6 +17,7 @@ class LayoutSettings {
     this.rowGap = 32.0,
     this.labelGap = 32.0,
     this.poolPadding = 16.0,
+    this.defaultRowHeight,
   });
 
   LayoutSettings copyWith({
@@ -24,6 +27,8 @@ class LayoutSettings {
     double? rowGap,
     double? labelGap,
     double? poolPadding,
+    double? defaultRowHeight,
+    bool clearDefaultRowHeight = false,
   }) {
     return LayoutSettings(
       boardTopPad: boardTopPad ?? this.boardTopPad,
@@ -32,6 +37,8 @@ class LayoutSettings {
       rowGap: rowGap ?? this.rowGap,
       labelGap: labelGap ?? this.labelGap,
       poolPadding: poolPadding ?? this.poolPadding,
+      defaultRowHeight:
+          clearDefaultRowHeight ? null : (defaultRowHeight ?? this.defaultRowHeight),
     );
   }
 }

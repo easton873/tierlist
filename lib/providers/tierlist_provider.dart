@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -174,6 +175,36 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     state = state.copyWith(
       tiers: state.tiers
           .map((r) => r.id == tierId ? r.copyWith(labelColor: newColor) : r)
+          .toList(),
+    );
+  }
+
+  void addImageTier(Uint8List bytes) {
+    final newTier = TierRow(
+      id: _uuid.v4(),
+      label: '',
+      labelColor: Colors.transparent,
+      backgroundImage: bytes,
+    );
+    state = state.copyWith(tiers: [...state.tiers, newTier]);
+  }
+
+  void updateTierHeight(String tierId, double? height) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId
+              ? r.copyWith(customHeight: height, clearCustomHeight: height == null)
+              : r)
+          .toList(),
+    );
+  }
+
+  void updateTierBackgroundImage(String tierId, Uint8List? bytes) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId
+              ? r.copyWith(backgroundImage: bytes, clearBackgroundImage: bytes == null)
+              : r)
           .toList(),
     );
   }
