@@ -7,6 +7,8 @@ class TierRow {
   final Color labelColor;
   final double rowHeight;
   final List<TierItem> items;
+  // null = auto-scale (40% of row height)
+  final double? fontSize;
 
   const TierRow({
     required this.id,
@@ -14,6 +16,7 @@ class TierRow {
     required this.labelColor,
     this.rowHeight = 80.0,
     this.items = const [],
+    this.fontSize,
   });
 
   TierRow copyWith({
@@ -22,6 +25,8 @@ class TierRow {
     Color? labelColor,
     double? rowHeight,
     List<TierItem>? items,
+    double? fontSize,
+    bool clearFontSize = false,
   }) {
     return TierRow(
       id: id ?? this.id,
@@ -29,6 +34,7 @@ class TierRow {
       labelColor: labelColor ?? this.labelColor,
       rowHeight: rowHeight ?? this.rowHeight,
       items: items ?? this.items,
+      fontSize: clearFontSize ? null : (fontSize ?? this.fontSize),
     );
   }
 }

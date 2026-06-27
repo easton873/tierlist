@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../models/free_item.dart';
 import '../models/tier_item.dart';
 import '../models/tier_row.dart';
 import '../models/text_overlay_config.dart';
 import '../utils/default_tiers.dart';
+
+const _uuid = Uuid();
 
 class TierlistState {
   final List<TierRow> tiers;
@@ -131,6 +134,88 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
         return fi;
       }).toList(),
     );
+  }
+
+  void addTier() {
+    const defaultColors = [
+      Color(0xFFB0BEC5),
+      Color(0xFFCE93D8),
+      Color(0xFF80CBC4),
+      Color(0xFFFFCC80),
+      Color(0xFFEF9A9A),
+    ];
+    final color = defaultColors[state.tiers.length % defaultColors.length];
+    final newTier = TierRow(
+      id: _uuid.v4(),
+      label: 'New',
+      labelColor: color,
+    );
+    state = state.copyWith(tiers: [...state.tiers, newTier]);
+  }
+
+  void deleteTier(String tierId) {
+    if (state.tiers.length <= 1) return;
+    final tier = state.tiers.firstWhere((r) => r.id == tierId);
+    state = state.copyWith(
+      tiers: state.tiers.where((r) => r.id != tierId).toList(),
+      pool: [...state.pool, ...tier.items],
+    );
+  }
+
+  void renameTier(String tierId, String newLabel) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId ? r.copyWith(label: newLabel) : r)
+          .toList(),
+    );
+  }
+
+  void recolorTier(String tierId, Color newColor) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId ? r.copyWith(labelColor: newColor) : r)
+          .toList(),
+    );
+  }
+
+  void reorderTier(String movedId, String targetId) {
+    final list = [...state.tiers];
+    final fromIdx = list.indexWhere((r) => r.id == movedId);
+    final toIdx = list.indexWhere((r) => r.id == targetId);
+    if (fromIdx == -1 || toIdx == -1 || fromIdx == toIdx) return;
+    final moved = list.removeAt(fromIdx);
+    list.insert(toIdx, moved);
+    state = state.copyWith(tiers: list);
+  }
+
+  void moveTierUp(String tierId) {
+    final idx = state.tiers.indexWhere((r) => r.id == tierId);
+    if (idx <= 0) return;
+    final list = [...state.tiers];
+    final tmp = list[idx - 1];
+    list[idx - 1] = list[idx];
+    list[idx] = tmp;
+    state = state.copyWith(tiers: list);
+  }
+
+  void updateTierFontSize(String tierId, double? fontSize) {
+    state = state.copyWith(
+      tiers: state.tiers
+          .map((r) => r.id == tierId
+              ? r.copyWith(fontSize: fontSize, clearFontSize: fontSize == null)
+              : r)
+          .toList(),
+    );
+  }
+
+  void moveTierDown(String tierId) {
+    final idx = state.tiers.indexWhere((r) => r.id == tierId);
+    if (idx < 0 || idx >= state.tiers.length - 1) return;
+    final list = [...state.tiers];
+    final tmp = list[idx + 1];
+    list[idx + 1] = list[idx];
+    list[idx] = tmp;
+    state = state.copyWith(tiers: list);
   }
 
   TierItem? _findItem(String itemId) {

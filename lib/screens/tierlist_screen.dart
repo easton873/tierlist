@@ -7,6 +7,7 @@ import '../providers/app_mode_provider.dart';
 import '../providers/layout_settings_provider.dart';
 import '../providers/snap_provider.dart';
 import '../providers/tierlist_provider.dart';
+import '../providers/canvas_provider.dart';
 import '../widgets/app_mode_toggle.dart';
 import '../widgets/create_item_toolbar.dart';
 import '../widgets/inspector_panel.dart';
@@ -40,7 +41,6 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
   Widget _buildBody(WidgetRef ref, bool isEdit) {
     final freeItems = ref.watch(tierlistProvider).freeItems;
-    final tierCount = ref.watch(tierlistProvider).tiers.length;
     final snap = ref.watch(snapProvider);
 
     return LayoutBuilder(
@@ -48,8 +48,8 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
         final s = ref.watch(layoutSettingsProvider);
         final itemSize =
             (constraints.maxHeight - s.boardTopPad - s.boardBottomPad -
-                s.rowGap * (tierCount - 1)) /
-            tierCount;
+                s.rowGap * 5) /
+            6;
 
         return DragTarget<TierItem>(
           onWillAcceptWithDetails: (_) => !snap,
@@ -59,7 +59,11 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
             final localPos = rb != null
                 ? rb.globalToLocal(details.offset)
                 : details.offset;
-            ref.read(tierlistProvider.notifier).placeFreeItem(details.data, localPos);
+            final panOffset = ref.read(canvasProvider).panOffset;
+            ref.read(tierlistProvider.notifier).placeFreeItem(
+              details.data,
+              Offset(localPos.dx, localPos.dy + panOffset.dy),
+            );
           },
           builder: (context, candidates, rejected) {
             return Stack(
@@ -74,15 +78,18 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                   ],
                 ),
                 for (final fi in freeItems)
-                  Positioned(
-                    left: fi.position.dx,
-                    top: fi.position.dy,
-                    child: TierItemWidget(
-                      key: ValueKey(fi.item.id),
-                      item: fi.item,
-                      rowHeight: itemSize,
-                    ),
-                  ),
+                  Builder(builder: (context) {
+                    final pan = ref.watch(canvasProvider).panOffset;
+                    return Positioned(
+                      left: fi.position.dx,
+                      top: fi.position.dy - pan.dy,
+                      child: TierItemWidget(
+                        key: ValueKey(fi.item.id),
+                        item: fi.item,
+                        rowHeight: itemSize,
+                      ),
+                    );
+                  }),
               ],
             );
           },
@@ -113,6 +120,16 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
     if (event.logicalKey == LogicalKeyboardKey.keyP && !inTextField) {
       ref.read(appModeProvider.notifier).update((_) => AppMode.performance);
+      return true;
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.keyH && !inTextField) {
+      ref.read(canvasProvider.notifier).setTool(CanvasTool.hand);
+      return true;
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.keyV && !inTextField) {
+      ref.read(canvasProvider.notifier).setTool(CanvasTool.pointer);
       return true;
     }
 
@@ -167,6 +184,29 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
             ),
             const PaddingSettingsButton(),
           ],
+          Consumer(
+            builder: (context, ref, _) {
+              final tool = ref.watch(canvasProvider.select((s) => s.tool));
+              final isHand = tool == CanvasTool.hand;
+              return Tooltip(
+                message: isHand
+                    ? 'Hand tool — drag to pan canvas (V for pointer)'
+                    : 'Pointer tool — drag items (H for hand)',
+                child: IconButton(
+                  icon: Icon(
+                    isHand ? Icons.pan_tool : Icons.near_me,
+                    color: isHand ? Colors.amber : Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    ref.read(canvasProvider.notifier).setTool(
+                          isHand ? CanvasTool.pointer : CanvasTool.hand,
+                        );
+                  },
+                ),
+              );
+            },
+          ),
           const SizedBox(width: 8),
           const AppModeToggle(),
           const SizedBox(width: 16),

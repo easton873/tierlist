@@ -5,6 +5,7 @@ import '../models/tier_item.dart';
 import '../models/app_mode.dart';
 import '../painters/tier_item_painter.dart';
 import '../providers/app_mode_provider.dart';
+import '../providers/canvas_provider.dart';
 import '../providers/selection_provider.dart';
 
 class TierItemWidget extends ConsumerStatefulWidget {
@@ -54,6 +55,7 @@ class _TierItemWidgetState extends ConsumerState<TierItemWidget> {
   @override
   Widget build(BuildContext context) {
     final mode = ref.watch(appModeProvider);
+    final canvasTool = ref.watch(canvasProvider.select((s) => s.tool));
     final selectedId = ref.watch(selectionProvider);
     final isSelected = selectedId == widget.item.id;
     final itemHeight = widget.rowHeight - 2;
@@ -67,6 +69,11 @@ class _TierItemWidgetState extends ConsumerState<TierItemWidget> {
         ),
         child: child,
       );
+    }
+
+    // In hand tool mode items are not draggable
+    if (canvasTool == CanvasTool.hand) {
+      return child;
     }
 
     final dragData = widget.item;
