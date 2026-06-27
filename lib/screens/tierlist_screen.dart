@@ -16,6 +16,7 @@ import '../widgets/padding_settings_button.dart';
 import '../widgets/tier_item_widget.dart';
 import '../utils/tierlist_file_ops.dart';
 import '../widgets/tierlist_board.dart';
+import 'video_editor_screen.dart';
 
 class TierlistScreen extends ConsumerStatefulWidget {
   const TierlistScreen({super.key});
@@ -231,6 +232,19 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                               ),
                             );
                           },
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          icon: const Icon(Icons.video_settings_outlined, size: 16),
+                          label: const Text('Video Editor'),
+                          style: TextButton.styleFrom(
+                              foregroundColor: Colors.white70),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const VideoEditorScreen(),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         const AppModeToggle(),
