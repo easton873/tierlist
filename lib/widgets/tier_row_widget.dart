@@ -139,7 +139,7 @@ class TierRowWidget extends ConsumerWidget {
                 .read(tierlistProvider.notifier)
                 .moveItemToTier(details.data.id, row.id, row.items.length);
           },
-          builder: (context, _, __) {
+          builder: (context, candidate, rejected) {
             return Stack(
               children: [
                 content,

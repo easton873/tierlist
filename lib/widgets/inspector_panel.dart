@@ -19,12 +19,14 @@ class InspectorPanel extends ConsumerStatefulWidget {
 class _InspectorPanelState extends ConsumerState<InspectorPanel> {
   final _textController = TextEditingController();
   final _fontSizeController = TextEditingController();
+  final _itemSizeController = TextEditingController();
   String? _lastSelectedId;
 
   @override
   void dispose() {
     _textController.dispose();
     _fontSizeController.dispose();
+    _itemSizeController.dispose();
     super.dispose();
   }
 
@@ -38,6 +40,7 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
     final item = [
       ...state.pool,
       ...state.tiers.expand((r) => r.items),
+      ...state.freeItems.map((fi) => fi.item),
     ].where((i) => i.id == selectedId).firstOrNull;
 
     if (item == null) return _empty();
@@ -56,6 +59,10 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
         final sizeStr = overlay.fontSize.round().toString();
         if (_fontSizeController.text != sizeStr) {
           _fontSizeController.text = sizeStr;
+        }
+        final itemSizeStr = (item.customSize ?? 100.0).round().toString();
+        if (_itemSizeController.text != itemSizeStr) {
+          _itemSizeController.text = itemSizeStr;
         }
       });
     }
@@ -124,6 +131,81 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  _label('Item Size'),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Checkbox(
+                          value: item.autoSize,
+                          onChanged: (val) {
+                            final auto = val ?? true;
+                            ref.read(tierlistProvider.notifier).updateItemSize(
+                                selectedId,
+                                auto,
+                                auto ? null : (item.customSize ?? 100.0));
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Auto-size',
+                          style:
+                              TextStyle(color: Colors.white70, fontSize: 13)),
+                    ],
+                  ),
+                  if (!item.autoSize) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: (item.customSize ?? 100.0).clamp(20.0, 500.0),
+                            min: 20,
+                            max: 500,
+                            onChanged: (val) {
+                              final rounded = val.roundToDouble();
+                              _itemSizeController.text =
+                                  rounded.round().toString();
+                              ref
+                                  .read(tierlistProvider.notifier)
+                                  .updateItemSize(selectedId, false, rounded);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 52,
+                          child: TextField(
+                            controller: _itemSizeController,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: const Color(0xFF2A2A2A),
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                            ),
+                            onChanged: (val) {
+                              final parsed = double.tryParse(val);
+                              if (parsed != null && parsed >= 20) {
+                                ref
+                                    .read(tierlistProvider.notifier)
+                                    .updateItemSize(selectedId, false, parsed);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   _label('Overlay Text'),
                   const SizedBox(height: 6),

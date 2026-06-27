@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,7 +51,7 @@ class _TierEditDialogState extends State<TierEditDialog> {
   Uint8List? _backgroundImage;
   bool _imageCleared = false;
   Color? _backgroundColor;
-  bool _bgColorCleared = false;
+  final bool _bgColorCleared = false;
   double? _customHeight;
   bool _heightCleared = false;
   late final TextEditingController _heightController;

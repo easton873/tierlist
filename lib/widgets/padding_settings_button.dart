@@ -95,7 +95,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
 
   @override
   void dispose() {
-    for (final c in _controllers.values) c.dispose();
+    for (final c in _controllers.values) { c.dispose(); }
     _defaultHeightController.dispose();
     super.dispose();
   }

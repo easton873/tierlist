@@ -58,7 +58,9 @@ class _TierItemWidgetState extends ConsumerState<TierItemWidget> {
     final canvasTool = ref.watch(canvasProvider.select((s) => s.tool));
     final selectedId = ref.watch(selectionProvider);
     final isSelected = selectedId == widget.item.id;
-    final itemHeight = widget.rowHeight - 2;
+    final itemHeight = (!widget.item.autoSize && widget.item.customSize != null)
+        ? widget.item.customSize!
+        : widget.rowHeight - 2;
 
     Widget child = _buildItemContent(itemHeight);
 

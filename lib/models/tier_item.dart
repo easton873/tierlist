@@ -10,6 +10,8 @@ class TierItem {
   final String? imageName;
   final String? text;
   final TextOverlayConfig? overlay;
+  final bool autoSize;
+  final double? customSize;
 
   const TierItem({
     required this.id,
@@ -18,6 +20,8 @@ class TierItem {
     this.imageName,
     this.text,
     this.overlay,
+    this.autoSize = true,
+    this.customSize,
   });
 
   TierItem copyWith({
@@ -28,6 +32,9 @@ class TierItem {
     String? text,
     TextOverlayConfig? overlay,
     bool clearOverlay = false,
+    bool? autoSize,
+    double? customSize,
+    bool clearCustomSize = false,
   }) {
     return TierItem(
       id: id ?? this.id,
@@ -36,6 +43,8 @@ class TierItem {
       imageName: imageName ?? this.imageName,
       text: text ?? this.text,
       overlay: clearOverlay ? null : (overlay ?? this.overlay),
+      autoSize: autoSize ?? this.autoSize,
+      customSize: clearCustomSize ? null : (customSize ?? this.customSize),
     );
   }
 }

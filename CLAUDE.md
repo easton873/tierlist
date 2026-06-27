@@ -8,10 +8,9 @@ A macOS + web Flutter desktop app for creating tierlist videos. The user records
 # Hot reload (preferred during development):
 flutter run -d macos
 # then press 'r' to reload, 'R' for full restart
-
-# Full build + launch:
-flutter build macos --debug && open build/macos/Build/Products/Debug/tierlist.app
 ```
+
+Do NOT run `flutter build` — the user tests via hot reload only.
 
 ## Architecture
 

@@ -137,6 +137,37 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     );
   }
 
+  void updateItemSize(String itemId, bool autoSize, double? customSize) {
+    state = state.copyWith(
+      tiers: state.tiers.map((row) {
+        return row.copyWith(
+          items: row.items.map((item) {
+            if (item.id == itemId) {
+              return item.copyWith(autoSize: autoSize, customSize: customSize,
+                  clearCustomSize: customSize == null);
+            }
+            return item;
+          }).toList(),
+        );
+      }).toList(),
+      pool: state.pool.map((item) {
+        if (item.id == itemId) {
+          return item.copyWith(autoSize: autoSize, customSize: customSize,
+              clearCustomSize: customSize == null);
+        }
+        return item;
+      }).toList(),
+      freeItems: state.freeItems.map((fi) {
+        if (fi.item.id == itemId) {
+          return fi.copyWith(
+              item: fi.item.copyWith(autoSize: autoSize, customSize: customSize,
+                  clearCustomSize: customSize == null));
+        }
+        return fi;
+      }).toList(),
+    );
+  }
+
   void addTier() {
     const defaultColors = [
       Color(0xFFB0BEC5),
