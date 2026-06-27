@@ -14,6 +14,7 @@ import '../widgets/inspector_panel.dart';
 import '../widgets/item_pool_widget.dart';
 import '../widgets/padding_settings_button.dart';
 import '../widgets/tier_item_widget.dart';
+import '../utils/tierlist_file_ops.dart';
 import '../widgets/tierlist_board.dart';
 
 class TierlistScreen extends ConsumerStatefulWidget {
@@ -109,6 +110,13 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
       return true;
     }
 
+    final metaHeld = HardwareKeyboard.instance.isMetaPressed;
+    if (event.logicalKey == LogicalKeyboardKey.keyS && metaHeld) {
+      final ctx = this.context;
+      TierlistFileOps.export(ctx, ref);
+      return true;
+    }
+
     if (event.logicalKey == LogicalKeyboardKey.keyS && !inTextField) {
       ref.read(snapProvider.notifier).update((s) => !s);
       return true;
@@ -162,56 +170,79 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
-      appBar: _headerVisible ? AppBar(
-        backgroundColor: appBarColor,
-        title: const Text('Tierlist', style: TextStyle(color: Colors.white)),
-        actions: [
-          if (isEdit) ...[
-            const CreateItemToolbar(),
-            const SizedBox(width: 8),
-            Tooltip(
-              message: snap ? 'Snap on (S)' : 'Snap off (S)',
-              child: IconButton(
-                icon: Text(
-                  '🧲',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: snap ? null : const Color(0x44FFFFFF),
+      appBar: _headerVisible ? PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Container(
+          color: appBarColor,
+          child: SafeArea(
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                const Text(
+                  'Tierlist',
+                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (isEdit) ...[
+                          const CreateItemToolbar(),
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message: snap ? 'Snap on (S)' : 'Snap off (S)',
+                            child: IconButton(
+                              icon: Text(
+                                '🧲',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: snap ? null : const Color(0x44FFFFFF),
+                                ),
+                              ),
+                              onPressed: () =>
+                                  ref.read(snapProvider.notifier).update((s) => !s),
+                            ),
+                          ),
+                          const PaddingSettingsButton(),
+                        ],
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final tool = ref.watch(canvasProvider.select((s) => s.tool));
+                            final isHand = tool == CanvasTool.hand;
+                            return Tooltip(
+                              message: isHand
+                                  ? 'Hand tool — drag to pan canvas (V for pointer)'
+                                  : 'Pointer tool — drag items (H for hand)',
+                              child: IconButton(
+                                icon: Icon(
+                                  isHand ? Icons.pan_tool : Icons.near_me,
+                                  color: isHand ? Colors.amber : Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  ref.read(canvasProvider.notifier).setTool(
+                                        isHand ? CanvasTool.pointer : CanvasTool.hand,
+                                      );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        const AppModeToggle(),
+                        const SizedBox(width: 16),
+                      ],
+                    ),
                   ),
                 ),
-                onPressed: () =>
-                    ref.read(snapProvider.notifier).update((s) => !s),
-              ),
+              ],
             ),
-            const PaddingSettingsButton(),
-          ],
-          Consumer(
-            builder: (context, ref, _) {
-              final tool = ref.watch(canvasProvider.select((s) => s.tool));
-              final isHand = tool == CanvasTool.hand;
-              return Tooltip(
-                message: isHand
-                    ? 'Hand tool — drag to pan canvas (V for pointer)'
-                    : 'Pointer tool — drag items (H for hand)',
-                child: IconButton(
-                  icon: Icon(
-                    isHand ? Icons.pan_tool : Icons.near_me,
-                    color: isHand ? Colors.amber : Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    ref.read(canvasProvider.notifier).setTool(
-                          isHand ? CanvasTool.pointer : CanvasTool.hand,
-                        );
-                  },
-                ),
-              );
-            },
           ),
-          const SizedBox(width: 8),
-          const AppModeToggle(),
-          const SizedBox(width: 16),
-        ],
+        ),
       ) : null,
       body: _buildBody(ref, isEdit),
     );

@@ -1,8 +1,43 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'tier_item.dart';
 
 class TierRow {
+  static TierRow fromJson(Map<String, dynamic> json) {
+    return TierRow(
+      id: json['id'] as String,
+      label: json['label'] as String,
+      labelColor: Color(json['labelColor'] as int),
+      items: (json['items'] as List<dynamic>)
+          .map((e) => TierItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      fontSize: json['fontSize'] != null
+          ? (json['fontSize'] as num).toDouble()
+          : null,
+      backgroundImage: json['backgroundImage'] != null
+          ? base64Decode(json['backgroundImage'] as String)
+          : null,
+      backgroundColor: json['backgroundColor'] != null
+          ? Color(json['backgroundColor'] as int)
+          : null,
+      customHeight: json['customHeight'] != null
+          ? (json['customHeight'] as num).toDouble()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'label': label,
+        'labelColor': labelColor.toARGB32(),
+        'items': items.map((i) => i.toJson()).toList(),
+        if (fontSize != null) 'fontSize': fontSize,
+        if (backgroundImage != null)
+          'backgroundImage': base64Encode(backgroundImage!),
+        if (backgroundColor != null) 'backgroundColor': backgroundColor!.toARGB32(),
+        if (customHeight != null) 'customHeight': customHeight,
+      };
   final String id;
   final String label;
   final Color labelColor;

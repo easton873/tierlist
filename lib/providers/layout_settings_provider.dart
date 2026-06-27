@@ -1,6 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LayoutSettings {
+  static LayoutSettings fromJson(Map<String, dynamic> json) {
+    return LayoutSettings(
+      boardTopPad: (json['boardTopPad'] as num).toDouble(),
+      boardBottomPad: (json['boardBottomPad'] as num).toDouble(),
+      boardLeftPad: (json['boardLeftPad'] as num).toDouble(),
+      rowGap: (json['rowGap'] as num).toDouble(),
+      labelGap: (json['labelGap'] as num).toDouble(),
+      poolPadding: (json['poolPadding'] as num).toDouble(),
+      defaultRowHeight: json['defaultRowHeight'] != null
+          ? (json['defaultRowHeight'] as num).toDouble()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'boardTopPad': boardTopPad,
+        'boardBottomPad': boardBottomPad,
+        'boardLeftPad': boardLeftPad,
+        'rowGap': rowGap,
+        'labelGap': labelGap,
+        'poolPadding': poolPadding,
+        if (defaultRowHeight != null) 'defaultRowHeight': defaultRowHeight,
+      };
   final double boardTopPad;
   final double boardBottomPad;
   final double boardLeftPad;
@@ -52,6 +75,10 @@ class LayoutSettingsNotifier extends StateNotifier<LayoutSettings> {
 
   void resetToDefaults() {
     state = const LayoutSettings();
+  }
+
+  void loadFromFile(LayoutSettings settings) {
+    state = settings;
   }
 }
 

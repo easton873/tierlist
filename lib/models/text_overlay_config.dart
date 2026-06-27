@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
 
 class TextOverlayConfig {
+  static TextOverlayConfig fromJson(Map<String, dynamic> json) {
+    return TextOverlayConfig(
+      text: json['text'] as String,
+      textColor: Color(json['textColor'] as int),
+      borderColor: Color(json['borderColor'] as int),
+      borderWidth: (json['borderWidth'] as num).toDouble(),
+      autoScale: json['autoScale'] as bool,
+      fontSize: (json['fontSize'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'text': text,
+        'textColor': textColor.toARGB32(),
+        'borderColor': borderColor.toARGB32(),
+        'borderWidth': borderWidth,
+        'autoScale': autoScale,
+        'fontSize': fontSize,
+      };
   final String text;
   final Color textColor;
   final Color borderColor;

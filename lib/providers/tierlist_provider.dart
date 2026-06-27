@@ -300,6 +300,10 @@ class TierlistNotifier extends StateNotifier<TierlistState> {
     state = state.copyWith(tiers: list);
   }
 
+  void loadFromFile(TierlistState newState) {
+    state = newState;
+  }
+
   TierItem? _findItem(String itemId) {
     for (final row in state.tiers) {
       for (final item in row.items) {

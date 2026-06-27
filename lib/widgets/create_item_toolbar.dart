@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../models/tier_item.dart';
+import '../utils/tierlist_file_ops.dart';
 import '../models/text_overlay_config.dart';
 import '../providers/tierlist_provider.dart';
 import '../utils/image_import_util.dart';
@@ -17,10 +18,20 @@ class CreateItemToolbar extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         TextButton.icon(
-          onPressed: () => _importImage(ref),
-          icon: const Icon(Icons.add_photo_alternate, size: 18),
-          label: const Text('Import Image'),
+          onPressed: () => TierlistFileOps.export(context, ref),
+          icon: const Icon(Icons.upload_file, size: 18),
+          label: const Text('Export'),
         ),
+        const SizedBox(width: 8),
+        TextButton.icon(
+          onPressed: () => TierlistFileOps.import(context, ref),
+          icon: const Icon(Icons.download, size: 18),
+          label: const Text('Import'),
+        ),
+        const SizedBox(width: 8),
+        _ImportImageButton(onItemPicked: (item) {
+          ref.read(tierlistProvider.notifier).addItemToPool(item);
+        }),
         const SizedBox(width: 8),
         TextButton.icon(
           onPressed: () => _addTextItem(context, ref),
@@ -29,13 +40,6 @@ class CreateItemToolbar extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _importImage(WidgetRef ref) async {
-    final item = await pickImageItem();
-    if (item != null) {
-      ref.read(tierlistProvider.notifier).addItemToPool(item);
-    }
   }
 
   Future<void> _addTextItem(BuildContext context, WidgetRef ref) async {
@@ -73,5 +77,69 @@ class CreateItemToolbar extends ConsumerWidget {
       ref.read(tierlistProvider.notifier).addItemToPool(item);
     }
     controller.dispose();
+  }
+}
+
+enum _ImageSource { file, clipboard }
+
+class _ImportImageButton extends StatelessWidget {
+  const _ImportImageButton({required this.onItemPicked});
+
+  final void Function(TierItem item) onItemPicked;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_ImageSource>(
+      tooltip: '',
+      onSelected: (source) => _handle(context, source),
+      itemBuilder: (_) => const [
+        PopupMenuItem(
+          value: _ImageSource.file,
+          child: ListTile(
+            leading: Icon(Icons.folder_open, size: 18),
+            title: Text('From File'),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+          ),
+        ),
+        PopupMenuItem(
+          value: _ImageSource.clipboard,
+          child: ListTile(
+            leading: Icon(Icons.content_paste, size: 18),
+            title: Text('From Clipboard'),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+          ),
+        ),
+      ],
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add_photo_alternate, size: 18),
+            SizedBox(width: 6),
+            Text('Import Image'),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handle(BuildContext context, _ImageSource source) async {
+    final TierItem? item;
+    if (source == _ImageSource.file) {
+      item = await pickImageItem();
+    } else {
+      item = await clipboardImageItem();
+      if (item == null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No image found on clipboard')),
+        );
+      }
+    }
+    if (item != null) onItemPicked(item);
   }
 }
