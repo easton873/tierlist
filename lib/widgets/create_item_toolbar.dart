@@ -51,8 +51,13 @@ class CreateItemToolbar extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Text'),
-          onSubmitted: (_) => Navigator.of(ctx).pop(true),
+          maxLines: null,
+          minLines: 3,
+          keyboardType: TextInputType.multiline,
+          decoration: const InputDecoration(
+            labelText: 'Text',
+            hintText: 'Enter to add newlines',
+          ),
         ),
         actions: [
           TextButton(

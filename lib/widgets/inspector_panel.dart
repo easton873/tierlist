@@ -212,6 +212,9 @@ class _InspectorPanelState extends ConsumerState<InspectorPanel> {
                   TextField(
                     controller: _textController,
                     style: const TextStyle(color: Colors.white, fontSize: 13),
+                    maxLines: null,
+                    minLines: 2,
+                    keyboardType: TextInputType.multiline,
                     decoration: InputDecoration(
                       hintText: 'Enter text overlay…',
                       hintStyle: TextStyle(color: Colors.grey[600]),
