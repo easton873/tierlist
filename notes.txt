@@ -5,15 +5,16 @@ Already done features:
 - Ability to put autoscaling text on the images. The text should be white with a thick opaque black border around each letter. You should be able to change the color of both the border and the actual color of the text.
 - Ability to put text by itself with no image that has an easy to click hit box so I can drag it around with ease.
 - Add two modes to the GUI, one for creating the scene, and one for recording. You should be able to toggle between this "edit" mode and "creation" mode.
+- When things are dragged to a tier they should snap place in the row (there should be a setting in performance mode to toggle this on or off)
 
 Future Wishlist:
 - Ability to add new tiers to the list
 - Ability to change the tiers themselves (like switch the F tier with the A tier, or delete tiers, or change what letter is on the tier, or make the tier several letters or words instead of just a single letter)
-- When things are dragged to a tier they should snap place in the row (there should be a setting in performance mode to toggle this on or off)
-- Ability to save these scense of things to tier persistently. Also they should export to a file so I can save them all on my computer where ever I want to save them. I also would like to be able to import these files to load old scenes. They can be .tierlist files.
+- Ability to save these scense of things to tier persistently. Also they should export to a file so I can save them all on my computer where ever I want to save them. I also would like to be able to import these files to load old scenes. They can be .tierlist files. There should probably also be a version associated with each .tierlist file and a migration from each version to each version
 - Ability to make the pictures as big as I want so they can fit in multiple tiers if needed
 - Ability to scroll around the screen or lock it in. This would also need to include the ability to zoom in and out using a number input so I can zoom in or out as far as I need to.
 - Ability to add new tiers that aren't anything but an image, so basically I want to be able to add images that take up whatever amount of background space I see fit.
 - Ability to do a screen recording so this application can produce screen recordings. This is a nice to have because I can always just use my computer's built in screen recording.
+- Ability to add the intro and outro to the screen recordings. Should be togglable.
 
 I want you to plan on adding all of these things but just start with the first 4 things on the wish list. Also brainstorm the dependencies you will need in order to do the rest of these things.
