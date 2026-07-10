@@ -29,4 +29,17 @@ abstract class TierlistFileOps {
     ref.read(layoutSettingsProvider.notifier).loadFromFile(file.layoutSettings);
     ref.read(snapProvider.notifier).update((_) => file.snap);
   }
+
+  static Future<void> importFromPath(
+    BuildContext context,
+    WidgetRef ref,
+    String path,
+  ) async {
+    final file = await loadTierlistFileFromPath(context, path);
+    if (file == null) return;
+
+    ref.read(tierlistProvider.notifier).loadFromFile(file.toTierlistState());
+    ref.read(layoutSettingsProvider.notifier).loadFromFile(file.layoutSettings);
+    ref.read(snapProvider.notifier).update((_) => file.snap);
+  }
 }

@@ -2,13 +2,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LayoutSettings {
   static LayoutSettings fromJson(Map<String, dynamic> json) {
+    // Older save files only have a single 'poolPadding' value; fall back to
+    // it for any per-side value that isn't present.
+    final legacyPoolPadding = (json['poolPadding'] as num?)?.toDouble() ?? 16.0;
     return LayoutSettings(
       boardTopPad: (json['boardTopPad'] as num).toDouble(),
       boardBottomPad: (json['boardBottomPad'] as num).toDouble(),
       boardLeftPad: (json['boardLeftPad'] as num).toDouble(),
       rowGap: (json['rowGap'] as num).toDouble(),
       labelGap: (json['labelGap'] as num).toDouble(),
-      poolPadding: (json['poolPadding'] as num).toDouble(),
+      poolPaddingLeft: (json['poolPaddingLeft'] as num?)?.toDouble() ?? 4.0,
+      poolPaddingTop: (json['poolPaddingTop'] as num?)?.toDouble() ?? legacyPoolPadding,
+      poolPaddingRight: (json['poolPaddingRight'] as num?)?.toDouble() ?? legacyPoolPadding,
+      poolPaddingBottom: (json['poolPaddingBottom'] as num?)?.toDouble() ?? legacyPoolPadding,
       defaultRowHeight: json['defaultRowHeight'] != null
           ? (json['defaultRowHeight'] as num).toDouble()
           : null,
@@ -21,7 +27,10 @@ class LayoutSettings {
         'boardLeftPad': boardLeftPad,
         'rowGap': rowGap,
         'labelGap': labelGap,
-        'poolPadding': poolPadding,
+        'poolPaddingLeft': poolPaddingLeft,
+        'poolPaddingTop': poolPaddingTop,
+        'poolPaddingRight': poolPaddingRight,
+        'poolPaddingBottom': poolPaddingBottom,
         if (defaultRowHeight != null) 'defaultRowHeight': defaultRowHeight,
       };
   final double boardTopPad;
@@ -29,7 +38,10 @@ class LayoutSettings {
   final double boardLeftPad;
   final double rowGap;
   final double labelGap;
-  final double poolPadding;
+  final double poolPaddingLeft;
+  final double poolPaddingTop;
+  final double poolPaddingRight;
+  final double poolPaddingBottom;
   // null = auto (viewport / 6); non-null = fixed px for all non-custom rows
   final double? defaultRowHeight;
 
@@ -39,7 +51,10 @@ class LayoutSettings {
     this.boardLeftPad = 50.0,
     this.rowGap = 32.0,
     this.labelGap = 32.0,
-    this.poolPadding = 16.0,
+    this.poolPaddingLeft = 4.0,
+    this.poolPaddingTop = 16.0,
+    this.poolPaddingRight = 16.0,
+    this.poolPaddingBottom = 16.0,
     this.defaultRowHeight,
   });
 
@@ -49,7 +64,10 @@ class LayoutSettings {
     double? boardLeftPad,
     double? rowGap,
     double? labelGap,
-    double? poolPadding,
+    double? poolPaddingLeft,
+    double? poolPaddingTop,
+    double? poolPaddingRight,
+    double? poolPaddingBottom,
     double? defaultRowHeight,
     bool clearDefaultRowHeight = false,
   }) {
@@ -59,7 +77,10 @@ class LayoutSettings {
       boardLeftPad: boardLeftPad ?? this.boardLeftPad,
       rowGap: rowGap ?? this.rowGap,
       labelGap: labelGap ?? this.labelGap,
-      poolPadding: poolPadding ?? this.poolPadding,
+      poolPaddingLeft: poolPaddingLeft ?? this.poolPaddingLeft,
+      poolPaddingTop: poolPaddingTop ?? this.poolPaddingTop,
+      poolPaddingRight: poolPaddingRight ?? this.poolPaddingRight,
+      poolPaddingBottom: poolPaddingBottom ?? this.poolPaddingBottom,
       defaultRowHeight:
           clearDefaultRowHeight ? null : (defaultRowHeight ?? this.defaultRowHeight),
     );

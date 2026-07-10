@@ -17,26 +17,29 @@ class CreateItemToolbar extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TextButton.icon(
-          onPressed: () => TierlistFileOps.export(context, ref),
-          icon: const Icon(Icons.upload_file, size: 18),
-          label: const Text('Export'),
+        Tooltip(
+          message: 'Export tierlist',
+          child: IconButton(
+            onPressed: () => TierlistFileOps.export(context, ref),
+            icon: const Icon(Icons.upload_file, size: 18),
+          ),
         ),
-        const SizedBox(width: 8),
-        TextButton.icon(
-          onPressed: () => TierlistFileOps.import(context, ref),
-          icon: const Icon(Icons.download, size: 18),
-          label: const Text('Import'),
+        Tooltip(
+          message: 'Import tierlist',
+          child: IconButton(
+            onPressed: () => TierlistFileOps.import(context, ref),
+            icon: const Icon(Icons.download, size: 18),
+          ),
         ),
-        const SizedBox(width: 8),
         _ImportImageButton(onItemPicked: (item) {
           ref.read(tierlistProvider.notifier).addItemToPool(item);
         }),
-        const SizedBox(width: 8),
-        TextButton.icon(
-          onPressed: () => _addTextItem(context, ref),
-          icon: const Icon(Icons.text_fields, size: 18),
-          label: const Text('Add Text'),
+        Tooltip(
+          message: 'Add text item',
+          child: IconButton(
+            onPressed: () => _addTextItem(context, ref),
+            icon: const Icon(Icons.text_fields, size: 18),
+          ),
         ),
       ],
     );
@@ -95,7 +98,7 @@ class _ImportImageButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_ImageSource>(
-      tooltip: '',
+      tooltip: 'Add image',
       onSelected: (source) => _handle(context, source),
       itemBuilder: (_) => const [
         PopupMenuItem(
@@ -118,14 +121,12 @@ class _ImportImageButton extends StatelessWidget {
         ),
       ],
       child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.add_photo_alternate, size: 18),
-            SizedBox(width: 6),
-            Text('Import Image'),
-            SizedBox(width: 4),
+            SizedBox(width: 2),
             Icon(Icons.arrow_drop_down, size: 16),
           ],
         ),

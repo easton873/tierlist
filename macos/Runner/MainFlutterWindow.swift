@@ -2,6 +2,9 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
+  static var fileOpenChannel: FlutterMethodChannel?
+  static var dartIsReady = false
+
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
@@ -9,6 +12,23 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+
+    let fileOpenRegistrar = flutterViewController.registrar(forPlugin: "TierlistFileOpenPlugin")
+    let fileOpenChannel = FlutterMethodChannel(
+      name: "tierlist/fileOpen",
+      binaryMessenger: fileOpenRegistrar.messenger
+    )
+    fileOpenChannel.setMethodCallHandler { call, result in
+      if call.method == "getInitialFile" {
+        let delegate = NSApp.delegate as? AppDelegate
+        result(delegate?.pendingFilePath)
+        delegate?.pendingFilePath = nil
+        MainFlutterWindow.dartIsReady = true
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    MainFlutterWindow.fileOpenChannel = fileOpenChannel
 
     let registrar = flutterViewController.registrar(forPlugin: "TierlistClipboardPlugin")
     let channel = FlutterMethodChannel(

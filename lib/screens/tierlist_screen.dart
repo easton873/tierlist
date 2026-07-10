@@ -25,6 +25,8 @@ class TierlistScreen extends ConsumerStatefulWidget {
 }
 
 class _TierlistScreenState extends ConsumerState<TierlistScreen> {
+  static const _fileOpenChannel = MethodChannel('tierlist/fileOpen');
+
   bool _headerVisible = true;
   final _bodyStackKey = GlobalKey();
 
@@ -32,12 +34,36 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
   void initState() {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handleKey);
+    _setupFileOpenChannel();
   }
 
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleKey);
+    _fileOpenChannel.setMethodCallHandler(null);
     super.dispose();
+  }
+
+  void _setupFileOpenChannel() {
+    _fileOpenChannel.setMethodCallHandler((call) async {
+      if (call.method == 'openFile') {
+        final path = call.arguments as String?;
+        if (path != null && mounted) {
+          await TierlistFileOps.importFromPath(context, ref, path);
+        }
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final path = await _fileOpenChannel.invokeMethod<String>('getInitialFile');
+        if (path != null && mounted) {
+          await TierlistFileOps.importFromPath(context, ref, path);
+        }
+      } catch (_) {
+        // Not available on non-macOS builds.
+      }
+    });
   }
 
   Widget _buildBody(WidgetRef ref, bool isEdit) {
@@ -177,12 +203,6 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
           child: SafeArea(
             child: Row(
               children: [
-                const SizedBox(width: 16),
-                const Text(
-                  'Tierlist',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,

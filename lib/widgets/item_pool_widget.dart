@@ -15,7 +15,7 @@ class ItemPoolWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pool = ref.watch(tierlistProvider).pool;
     final snap = ref.watch(snapProvider);
-    final poolPad = ref.watch(layoutSettingsProvider).poolPadding;
+    final layout = ref.watch(layoutSettingsProvider);
 
     return DragTarget<TierItem>(
       onWillAcceptWithDetails: (_) => snap,
@@ -37,7 +37,12 @@ class ItemPoolWidget extends ConsumerWidget {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(4, poolPad, poolPad, poolPad),
+                    padding: EdgeInsets.fromLTRB(
+                      layout.poolPaddingLeft,
+                      layout.poolPaddingTop,
+                      layout.poolPaddingRight,
+                      layout.poolPaddingBottom,
+                    ),
                     child: Wrap(
                       spacing: 4,
                       runSpacing: 4,

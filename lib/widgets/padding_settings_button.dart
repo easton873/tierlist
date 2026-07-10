@@ -86,7 +86,10 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
       'boardLeftPad': TextEditingController(text: _fmt(s.boardLeftPad)),
       'rowGap': TextEditingController(text: _fmt(s.rowGap)),
       'labelGap': TextEditingController(text: _fmt(s.labelGap)),
-      'poolPadding': TextEditingController(text: _fmt(s.poolPadding)),
+      'poolPaddingLeft': TextEditingController(text: _fmt(s.poolPaddingLeft)),
+      'poolPaddingTop': TextEditingController(text: _fmt(s.poolPaddingTop)),
+      'poolPaddingRight': TextEditingController(text: _fmt(s.poolPaddingRight)),
+      'poolPaddingBottom': TextEditingController(text: _fmt(s.poolPaddingBottom)),
     };
     _defaultHeightController = TextEditingController(
       text: s.defaultRowHeight != null ? _fmt(s.defaultRowHeight!) : '',
@@ -111,7 +114,10 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
         case 'boardLeftPad': return s.copyWith(boardLeftPad: value);
         case 'rowGap': return s.copyWith(rowGap: value);
         case 'labelGap': return s.copyWith(labelGap: value);
-        case 'poolPadding': return s.copyWith(poolPadding: value);
+        case 'poolPaddingLeft': return s.copyWith(poolPaddingLeft: value);
+        case 'poolPaddingTop': return s.copyWith(poolPaddingTop: value);
+        case 'poolPaddingRight': return s.copyWith(poolPaddingRight: value);
+        case 'poolPaddingBottom': return s.copyWith(poolPaddingBottom: value);
         default: return s;
       }
     });
@@ -137,7 +143,10 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
       case 'boardLeftPad': return s.boardLeftPad;
       case 'rowGap': return s.rowGap;
       case 'labelGap': return s.labelGap;
-      case 'poolPadding': return s.poolPadding;
+      case 'poolPaddingLeft': return s.poolPaddingLeft;
+      case 'poolPaddingTop': return s.poolPaddingTop;
+      case 'poolPaddingRight': return s.poolPaddingRight;
+      case 'poolPaddingBottom': return s.poolPaddingBottom;
       default: return 0;
     }
   }
@@ -196,7 +205,20 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
                       _row('Left padding', 'boardLeftPad', s.boardLeftPad, 120),
                       _row('Row gap', 'rowGap', s.rowGap, 80),
                       _row('Label gap', 'labelGap', s.labelGap, 80),
-                      _row('Pool padding', 'poolPadding', s.poolPadding, 60),
+                      const Divider(color: Colors.white12, height: 20),
+                      const Text(
+                        'Item Pool',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      _row('Pool top', 'poolPaddingTop', s.poolPaddingTop, 60),
+                      _row('Pool bottom', 'poolPaddingBottom', s.poolPaddingBottom, 60),
+                      _row('Pool left', 'poolPaddingLeft', s.poolPaddingLeft, 60),
+                      _row('Pool right', 'poolPaddingRight', s.poolPaddingRight, 60),
                       const Divider(color: Colors.white12, height: 20),
                       // Default row height
                       Padding(
@@ -297,7 +319,10 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
                             _controllers['boardLeftPad']!.text = _fmt(d.boardLeftPad);
                             _controllers['rowGap']!.text = _fmt(d.rowGap);
                             _controllers['labelGap']!.text = _fmt(d.labelGap);
-                            _controllers['poolPadding']!.text = _fmt(d.poolPadding);
+                            _controllers['poolPaddingLeft']!.text = _fmt(d.poolPaddingLeft);
+                            _controllers['poolPaddingTop']!.text = _fmt(d.poolPaddingTop);
+                            _controllers['poolPaddingRight']!.text = _fmt(d.poolPaddingRight);
+                            _controllers['poolPaddingBottom']!.text = _fmt(d.poolPaddingBottom);
                             _defaultHeightController.clear();
                           },
                           child: const Text(
