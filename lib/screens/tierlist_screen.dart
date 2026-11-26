@@ -101,7 +101,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Expanded(child: TierlistBoard()),
-                    SizedBox(width: 220, child: ItemPoolWidget(itemSize: itemSize)),
+                    SizedBox(width: s.poolWidth, child: ItemPoolWidget(itemSize: itemSize)),
                     if (isEdit) const InspectorPanel(),
                   ],
                 ),

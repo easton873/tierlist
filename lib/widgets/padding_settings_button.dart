@@ -90,6 +90,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
       'poolPaddingTop': TextEditingController(text: _fmt(s.poolPaddingTop)),
       'poolPaddingRight': TextEditingController(text: _fmt(s.poolPaddingRight)),
       'poolPaddingBottom': TextEditingController(text: _fmt(s.poolPaddingBottom)),
+      'poolWidth': TextEditingController(text: _fmt(s.poolWidth)),
     };
     _defaultHeightController = TextEditingController(
       text: s.defaultRowHeight != null ? _fmt(s.defaultRowHeight!) : '',
@@ -118,6 +119,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
         case 'poolPaddingTop': return s.copyWith(poolPaddingTop: value);
         case 'poolPaddingRight': return s.copyWith(poolPaddingRight: value);
         case 'poolPaddingBottom': return s.copyWith(poolPaddingBottom: value);
+        case 'poolWidth': return s.copyWith(poolWidth: value);
         default: return s;
       }
     });
@@ -147,6 +149,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
       case 'poolPaddingTop': return s.poolPaddingTop;
       case 'poolPaddingRight': return s.poolPaddingRight;
       case 'poolPaddingBottom': return s.poolPaddingBottom;
+      case 'poolWidth': return s.poolWidth;
       default: return 0;
     }
   }
@@ -215,6 +218,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
                         ),
                       ),
                       const SizedBox(height: 4),
+                      _row('Pool width', 'poolWidth', s.poolWidth, 600),
                       _row('Pool top', 'poolPaddingTop', s.poolPaddingTop, 60),
                       _row('Pool bottom', 'poolPaddingBottom', s.poolPaddingBottom, 60),
                       _row('Pool left', 'poolPaddingLeft', s.poolPaddingLeft, 60),
@@ -323,6 +327,7 @@ class _LayoutPanelState extends ConsumerState<_LayoutPanel> {
                             _controllers['poolPaddingTop']!.text = _fmt(d.poolPaddingTop);
                             _controllers['poolPaddingRight']!.text = _fmt(d.poolPaddingRight);
                             _controllers['poolPaddingBottom']!.text = _fmt(d.poolPaddingBottom);
+                            _controllers['poolWidth']!.text = _fmt(d.poolWidth);
                             _defaultHeightController.clear();
                           },
                           child: const Text(

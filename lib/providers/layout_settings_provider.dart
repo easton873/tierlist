@@ -18,6 +18,7 @@ class LayoutSettings {
       defaultRowHeight: json['defaultRowHeight'] != null
           ? (json['defaultRowHeight'] as num).toDouble()
           : null,
+      poolWidth: (json['poolWidth'] as num?)?.toDouble() ?? 220.0,
     );
   }
 
@@ -32,6 +33,7 @@ class LayoutSettings {
         'poolPaddingRight': poolPaddingRight,
         'poolPaddingBottom': poolPaddingBottom,
         if (defaultRowHeight != null) 'defaultRowHeight': defaultRowHeight,
+        'poolWidth': poolWidth,
       };
   final double boardTopPad;
   final double boardBottomPad;
@@ -44,6 +46,7 @@ class LayoutSettings {
   final double poolPaddingBottom;
   // null = auto (viewport / 6); non-null = fixed px for all non-custom rows
   final double? defaultRowHeight;
+  final double poolWidth;
 
   const LayoutSettings({
     this.boardTopPad = 50.0,
@@ -56,6 +59,7 @@ class LayoutSettings {
     this.poolPaddingRight = 16.0,
     this.poolPaddingBottom = 16.0,
     this.defaultRowHeight,
+    this.poolWidth = 220.0,
   });
 
   LayoutSettings copyWith({
@@ -70,6 +74,7 @@ class LayoutSettings {
     double? poolPaddingBottom,
     double? defaultRowHeight,
     bool clearDefaultRowHeight = false,
+    double? poolWidth,
   }) {
     return LayoutSettings(
       boardTopPad: boardTopPad ?? this.boardTopPad,
@@ -83,6 +88,7 @@ class LayoutSettings {
       poolPaddingBottom: poolPaddingBottom ?? this.poolPaddingBottom,
       defaultRowHeight:
           clearDefaultRowHeight ? null : (defaultRowHeight ?? this.defaultRowHeight),
+      poolWidth: poolWidth ?? this.poolWidth,
     );
   }
 }
