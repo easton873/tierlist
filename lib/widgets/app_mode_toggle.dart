@@ -14,12 +14,12 @@ class AppModeToggle extends ConsumerWidget {
       segments: const [
         ButtonSegment(
           value: AppMode.edit,
-          label: Text('Edit'),
+          tooltip: 'Edit mode (E)',
           icon: Icon(Icons.edit, size: 16),
         ),
         ButtonSegment(
           value: AppMode.performance,
-          label: Text('Perform'),
+          tooltip: 'Performance mode (P)',
           icon: Icon(Icons.videocam, size: 16),
         ),
       ],

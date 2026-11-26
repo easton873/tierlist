@@ -57,3 +57,21 @@ Future<TierlistFile?> loadTierlistFile(BuildContext context) async {
     return null;
   }
 }
+
+Future<TierlistFile?> loadTierlistFileFromPath(
+  BuildContext context,
+  String path,
+) async {
+  try {
+    final raw = await File(path).readAsString();
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    return TierlistFile.fromJson(json);
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load: $e')),
+      );
+    }
+    return null;
+  }
+}
