@@ -103,15 +103,15 @@ lib/
   set_tier_background_color, set_tier_background_image.
 - Note: a tier with a background color/image is a full-width row and its label is hidden (existing app behavior).
 
-## Wishlist (partly out of date)
-Tier add/edit/reorder/delete, image-only tiers, export/import and pan canvas already exist on main; this list predates them.
-In priority order from notes.txt:
-- Tier add / edit / reorder / delete
-- Snap-to-position within a row (currently always appends to end)
-- Save/export/import as `.tierlist` files (JSON + base64 images)
-- Multi-tier image sizing
-- Pan/zoom canvas (`InteractiveViewer`)
-- Image-only background tiers
-- Screen recording
+## Wishlist
+Done (verified in code): tier add/rename/recolor/reorder/delete, image-only background tiers, per-item and per-tier sizing
+(multi-tier image sizing), export/import of versioned `.tierlist` files with migrations, hand/pointer pan tool, MCP server.
+
+Not yet implemented, in priority order:
+- Snap-to-position within a row (drops currently always append: `row.items.length` in `tier_row_widget.dart`)
+- Zoom (numeric input) on top of the existing pan tool; optionally lock the view
+- Persistent autosave of the current scene (export/import to `.tierlist` exists, but nothing is saved automatically)
+- Screen recording (nice to have; the built-in macOS recorder works)
+- Intro/outro on recordings, toggleable
 
 Future packages to add when needed: `path_provider`, `shared_preferences`, `archive`
