@@ -11,7 +11,9 @@ import '../providers/canvas_provider.dart';
 import '../widgets/app_mode_toggle.dart';
 import '../widgets/create_item_toolbar.dart';
 import '../widgets/inspector_panel.dart';
+import '../mcp/capture.dart';
 import '../widgets/item_pool_widget.dart';
+import '../widgets/mcp_server_button.dart';
 import '../widgets/padding_settings_button.dart';
 import '../widgets/tier_item_widget.dart';
 import '../utils/tierlist_file_ops.dart';
@@ -229,6 +231,7 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                           ),
                           const PaddingSettingsButton(),
                         ],
+                        const McpServerButton(),
                         Consumer(
                           builder: (context, ref, _) {
                             final tool = ref.watch(canvasProvider.select((s) => s.tool));
@@ -264,7 +267,10 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
           ),
         ),
       ) : null,
-      body: _buildBody(ref, isEdit),
+      body: RepaintBoundary(
+        key: tierlistCaptureKey,
+        child: _buildBody(ref, isEdit),
+      ),
     );
   }
 }

@@ -86,7 +86,25 @@ lib/
     image_import_util.dart         # file_picker wrapper
 ```
 
-## Wishlist (not yet implemented)
+## MCP Server (lets Claude Code control the tierlist)
+- Off by default. Toggle with the hub icon in the header (green = running). The dialog shows a ready-to-paste
+  `claude mcp add --transport http tierlist http://127.0.0.1:7861/mcp --header "Authorization: Bearer <token>"`.
+- Package: `mcp_dart` (`StreamableMcpServer`). Binds to 127.0.0.1 only, bearer token required; the token is stored in
+  `~/.tierlist_mcp_token` inside the sandbox container so the command keeps working across launches.
+- Every tool is a thin wrapper over a `TierlistNotifier` method — add new tools in `lib/mcp/tierlist_mcp_tools.dart`.
+- Images are passed as **absolute file paths** (no base64). Reading arbitrary paths needs the
+  `temporary-exception.files.absolute-path.read-only` entitlement, which is in `DebugProfile.entitlements` only.
+  Release builds can run the server (`network.server`) but cannot read arbitrary paths.
+- Tiers can be referenced by id or by label (case-insensitive).
+- `get_screenshot` captures the `RepaintBoundary` keyed by `tierlistCaptureKey` (`lib/mcp/capture.dart`) in `TierlistScreen`.
+- Tests: `flutter test test/mcp_server_test.dart` starts the real server and drives it with an MCP client (uses port 7861).
+- Tools: get_state, get_screenshot, add_image_items, add_text_item, set_item_text, move_item, remove_item, add_tier,
+  add_image_row, rename_tier, set_tier_color, remove_tier, reorder_tiers, set_tier_height, set_tier_font_size,
+  set_tier_background_color, set_tier_background_image.
+- Note: a tier with a background color/image is a full-width row and its label is hidden (existing app behavior).
+
+## Wishlist (partly out of date)
+Tier add/edit/reorder/delete, image-only tiers, export/import and pan canvas already exist on main; this list predates them.
 In priority order from notes.txt:
 - Tier add / edit / reorder / delete
 - Snap-to-position within a row (currently always appends to end)
