@@ -24,8 +24,9 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      # base-href must match the repo name for project pages (easton873.github.io/tierlist/)
-      - run: flutter build web --release --base-href "/tierlist/"
+      # Served from the root of a custom domain (tierlist.eastongibson.com), so base-href is "/".
+      # If you ever go back to easton873.github.io/tierlist/, use --base-href "/tierlist/".
+      - run: flutter build web --release --base-href "/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
