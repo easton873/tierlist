@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -231,7 +232,8 @@ class _TierlistScreenState extends ConsumerState<TierlistScreen> {
                           ),
                           const PaddingSettingsButton(),
                         ],
-                        const McpServerButton(),
+                        // The MCP server needs a local socket, which browsers don't allow.
+                        if (!kIsWeb) const McpServerButton(),
                         Consumer(
                           builder: (context, ref, _) {
                             final tool = ref.watch(canvasProvider.select((s) => s.tool));
